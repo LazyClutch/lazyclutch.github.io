@@ -245,7 +245,7 @@
 
       
         
-          <span itemprop="articleBody"><p>Written by Lazy</p>
+          <p>Written by Lazy</p>
 <hr>
 <h3 id="AbsoluteValuable">AbsoluteValuable</h3><p>这个协议定义了一个静态方法，名曰<code>public static func abs(x: Self) -&gt; Self</code>，所以实现这个协议后可以作类似<code>T.abs(x)</code>的调用，在Swift标准库中，<code>Float</code>,<code>Float80</code>和<code>Double</code>实现了这个协议，所以可以写出如下的代码：</p>
 <pre><code>print<span class="list">(<span class="keyword">Float</span>.abs<span class="list">(<span class="keyword">-4</span>)</span>)</span>
@@ -260,72 +260,11 @@ print<span class="list">(<span class="keyword">Int</span>.abs<span class="list">
 
 <span class="keyword">print</span>(<span class="keyword">Int</span>.<span class="keyword">abs</span>(-<span class="number">2</span>))
 </code></pre><p>这样就可以顺利使用这个方法了。</p>
-<!-- Read More -->
-<h3 id="SignedNumberType">SignedNumberType</h3><p>这个协议定义了<code>-</code>运算，包括单目运算(类似于<code>-(-5) = 5</code>)以及双目运算，实现这个协议后，就可以进行常用的带有<code>-</code>的运算了,如上面提到的<code>AbsoluteValuable</code>就实现了这个协议，所以我们才能写出<code>print(Float.abs(-4))</code>这样的代码。<code>Int</code>、<code>Double</code>、<code>Float</code>等类型也实现了这个协议。</p>
-<h3 id="Equatable_&amp;_Hashable">Equatable &amp; Hashable</h3><p>实现了这两个协议，两个对象之间才能做比较。常用的基本类型都实现了<code>Hashable</code>协议，我们也可以自定义一个实现协议的对象：</p>
-<pre><code><span class="keyword">public</span> struct <span class="string">MyStruct:</span> Hashable {
-    var <span class="string">name:</span> String
-    var <span class="string">address:</span> String
-
-    <span class="keyword">public</span> var <span class="string">hashValue:</span> Int {
-        <span class="keyword">return</span> name.hashValue ^ address.hashValue
-    }
-}
-
-<span class="keyword">public</span> func ==(<span class="string">lhs:</span> MyStruct, <span class="string">rhs:</span> MyStruct) -&gt; Bool {
-    <span class="keyword">return</span> lhs.hashValue == rhs.hashValue
-}
-
-let struct1 = MyStruct(<span class="string">name:</span> <span class="string">"messi"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
-let struct2 = MyStruct(<span class="string">name:</span> <span class="string">"aguero"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
-let struct3 = MyStruct(<span class="string">name:</span> <span class="string">"aguero"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
-
-print(struct1 == struct2)
-<span class="comment">// prints: "false\n"</span>
-print(struct2 == struct3)
-<span class="comment">// prints: "true\n"</span>
-</code></pre><h3 id="Comparable">Comparable</h3><p>可以比较大小的协议，有四个方法需要实现，和<code>Equatable</code>类似。</p>
-<h3 id="XXXLiteralConvertible">XXXLiteralConvertible</h3><p>直接进行语义转换的协议，具体有<code>IntegerLiteralConvertible</code>,<code>ArrayLiteralConvertible</code>,<code>DictionaryLiteralConvertible</code>,<code>NilLiteralConvertible</code>,<br><code>BooleanLiteralConvertible</code>,<code>ExtendedGraphemeClusterLiteralConvertible</code>,<code>FloatLiteralConvertible</code>,<code>UnicodeScalarLiteralConvertible</code>,<br><code>StringLiteralConvertible</code>,实现这些协议并指定构造方法后，就可以直接给对象通过赋值的方式进行初始化了。</p>
-<p>假设我们有一个Circle的结构体：</p>
-<pre><code>struct Circle {
-    <span class="variable"><span class="keyword">var</span> radius</span>: <span class="typename">Float</span>
-    <span class="variable"><span class="keyword">var</span> area</span>: <span class="typename">Float</span>
-}
-</code></pre><p>我们可以添加语义初始化方法，比如用半径赋值初始化后，计算出面积：</p>
-<pre><code><span class="class"><span class="keyword">extension</span> <span class="title">Circle</span>: <span class="title">FloatLiteralConvertible</span> </span>{
-    <span class="keyword">init</span>(floatLiteral value: <span class="type">Float</span>) {
-        radius = value
-        area = <span class="number">3.14</span> * radius * radius
-    }
-}
-
-<span class="keyword">let</span> myCircle: <span class="type">Circle</span> = <span class="number">5.0</span>
-<span class="built_in">print</span>(myCircle.area)
-<span class="comment">// Prints: "78.5\n"</span>
-</code></pre><h3 id="Strideable">Strideable</h3><p>Stride, 是大踏步的意思。 遵循这个协议的类型可以返回一组不连续的数字，或是<strong>踏步向前</strong>，或是求两个实例间的步长。<code>Int</code>, <code>Double</code>, <code>Float</code>等都实现了这个协议。这个协议定义了下面的方法：</p>
-<pre><code>public <span class="func"><span class="keyword">func</span> <span class="title">distanceTo</span><span class="params">(other: <span class="keyword">Self</span>)</span></span> -&gt; <span class="type">Self</span>.<span class="type">Stride</span>
-public <span class="func"><span class="keyword">func</span> <span class="title">advancedBy</span><span class="params">(n: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">Self</span>
-public <span class="func"><span class="keyword">func</span> <span class="title">stride</span><span class="params">(to end: <span class="keyword">Self</span>, by stride: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">StrideTo</span>&lt;<span class="type">Self</span>&gt;
-public <span class="func"><span class="keyword">func</span> <span class="title">stride</span><span class="params">(through end: <span class="keyword">Self</span>, by stride: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">StrideThrough</span>&lt;<span class="type">Self</span>&gt;
-</code></pre><p>对于前两个方法，具体用法如下:</p>
-<pre><code><span class="tag">var</span> <span class="tag">a</span>: Int = <span class="number">0</span>
-<span class="tag">var</span> <span class="tag">b</span>: Int = <span class="number">5</span>
-
-<span class="function"><span class="title">print</span><span class="params">(a.advancedBy(<span class="number">5</span>)</span></span> == b)
-<span class="comment">// prints: "true\n"</span>
-<span class="function"><span class="title">print</span><span class="params">(a.distanceTo(b)</span></span> == <span class="tag">b</span> - a)
-<span class="comment">// prints: "true\n"</span>
-</code></pre><p>对于后两个方法，区别是<code>StrideTo</code>得到的集合不会包含<code>end</code>,而<code>StrideThrough</code>会包含<code>end</code>，举例如下：</p>
-<pre><code>var <span class="operator"><span class="keyword">start</span>: <span class="built_in">Int</span> = <span class="number">0</span>
-<span class="keyword">var</span> <span class="keyword">end</span>: <span class="built_in">Int</span> = <span class="number">5</span>
-<span class="keyword">var</span> <span class="keyword">to</span> = (<span class="keyword">start</span>.stride(<span class="keyword">to</span>: <span class="keyword">end</span>, <span class="keyword">by</span>: <span class="number">1</span>))
-<span class="keyword">var</span> <span class="keyword">through</span> = (<span class="keyword">start</span>.stride(<span class="keyword">through</span>: <span class="keyword">end</span>, <span class="keyword">by</span>: <span class="number">1</span>))
-
-print(<span class="keyword">to</span>.maxElement())
-// prints: <span class="string">"Optional(4)\n"</span>
-print(<span class="keyword">through</span>.maxElement())
-// prints: <span class="string">"Optional(5)\n"</span></span>
-</code></pre></span>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/11/23/Swift中的一些内置协议/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
         
       
     </div>
