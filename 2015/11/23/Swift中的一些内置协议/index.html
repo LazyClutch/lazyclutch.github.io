@@ -28,7 +28,7 @@
 
 
 
-  <meta name="keywords" content="iOS," />
+  <meta name="keywords" content="Swift," />
 
 
 
@@ -39,26 +39,26 @@
 
 <meta name="description" content="Written by Lazy
 
-最近写项目时遇到一个关于UICollectionViewCell加载异步图片的问题，记录如下。
-背景该ViewController是由UICollectionView承载的，所做的工作是根据url加载图片填充每个cell。
-基本思路由于url是通过block返回的一个数组，而且CollectionView设置了分页，所以每次block返回后会重新reload这个C">
+AbsoluteValuable这个协议定义了一个静态方法，名曰public static func abs(x: Self) -&amp;gt; Self，所以实现这个协议后可以作类似T.abs(x)的调用，在Swift标准库中，Float,Float80和Double实现了这个协议，所以可以写出如下的代码：
+print(Float.abs(-4))
+print(Dou">
 <meta property="og:type" content="article">
-<meta property="og:title" content="关于UICollectionViewCell异步加载图片的优化">
-<meta property="og:url" content="http://lazyclutch.github.io/2015/08/19/关于UICollectionViewCell异步加载图片的优化/index.html">
+<meta property="og:title" content="Swift中的一些内置协议">
+<meta property="og:url" content="http://lazyclutch.github.io/2015/11/23/Swift中的一些内置协议/index.html">
 <meta property="og:site_name" content="LazyClutch's Workstation">
 <meta property="og:description" content="Written by Lazy
 
-最近写项目时遇到一个关于UICollectionViewCell加载异步图片的问题，记录如下。
-背景该ViewController是由UICollectionView承载的，所做的工作是根据url加载图片填充每个cell。
-基本思路由于url是通过block返回的一个数组，而且CollectionView设置了分页，所以每次block返回后会重新reload这个C">
-<meta property="og:updated_time" content="2015-08-19T08:04:00.000Z">
+AbsoluteValuable这个协议定义了一个静态方法，名曰public static func abs(x: Self) -&amp;gt; Self，所以实现这个协议后可以作类似T.abs(x)的调用，在Swift标准库中，Float,Float80和Double实现了这个协议，所以可以写出如下的代码：
+print(Float.abs(-4))
+print(Dou">
+<meta property="og:updated_time" content="2015-11-24T06:35:03.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="关于UICollectionViewCell异步加载图片的优化">
+<meta name="twitter:title" content="Swift中的一些内置协议">
 <meta name="twitter:description" content="Written by Lazy
 
-最近写项目时遇到一个关于UICollectionViewCell加载异步图片的问题，记录如下。
-背景该ViewController是由UICollectionView承载的，所做的工作是根据url加载图片填充每个cell。
-基本思路由于url是通过block返回的一个数组，而且CollectionView设置了分页，所以每次block返回后会重新reload这个C">
+AbsoluteValuable这个协议定义了一个静态方法，名曰public static func abs(x: Self) -&amp;gt; Self，所以实现这个协议后可以作类似T.abs(x)的调用，在Swift标准库中，Float,Float80和Double实现了这个协议，所以可以写出如下的代码：
+print(Float.abs(-4))
+print(Dou">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -68,7 +68,7 @@
   };
 </script>
 
-  <title> 关于UICollectionViewCell异步加载图片的优化 | LazyClutch's Workstation </title>
+  <title> Swift中的一些内置协议 | LazyClutch's Workstation </title>
 
 </head>
 
@@ -203,7 +203,7 @@
           
           
             
-              关于UICollectionViewCell异步加载图片的优化
+              Swift中的一些内置协议
             
           
         </h1>
@@ -212,8 +212,8 @@
       <div class="post-meta">
         <span class="post-time">
           Posted on
-          <time itemprop="dateCreated" datetime="2015-08-19T13:47:06+08:00" content="2015-08-19">
-            2015-08-19
+          <time itemprop="dateCreated" datetime="2015-11-23T15:05:49+08:00" content="2015-11-23">
+            2015-11-23
           </time>
         </span>
 
@@ -238,8 +238,8 @@
           
             <span class="post-comments-count">
             &nbsp; | &nbsp;
-            <a href="/2015/08/19/关于UICollectionViewCell异步加载图片的优化/#comments" itemprop="discussionUrl">
-              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/08/19/关于UICollectionViewCell异步加载图片的优化/" itemprop="commentsCount"></span>
+            <a href="/2015/11/23/Swift中的一些内置协议/#comments" itemprop="discussionUrl">
+              <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2015/11/23/Swift中的一些内置协议/" itemprop="commentsCount"></span>
             </a>
           </span>
           
@@ -255,97 +255,84 @@
       
         <span itemprop="articleBody"><p>Written by Lazy</p>
 <hr>
-<p>最近写项目时遇到一个关于UICollectionViewCell加载异步图片的问题，记录如下。</p>
-<h2 id="背景">背景</h2><p>该ViewController是由UICollectionView承载的，所做的工作是根据url加载图片填充每个cell。</p>
-<h2 id="基本思路">基本思路</h2><p>由于url是通过block返回的一个数组，而且CollectionView设置了分页，所以每次block返回后会重新reload这个CollectionView，大致的代码如下：</p>
-<p><strong>ViewController.m</strong></p>
-<pre><code>- (<span class="keyword">void</span>)loadPicture{
-    [<span class="keyword">self</span><span class="variable">.imageFetcher</span> loadPictureWithCompletionHandler:^(<span class="built_in">NSArray</span> *pics, <span class="built_in">NSError</span> *error){
-        <span class="keyword">if</span>(!error){
-            [<span class="keyword">self</span><span class="variable">.pictures</span> addObjectsFromArray:pics];
-            [<span class="keyword">self</span><span class="variable">.collectionView</span> reloadData];
-        }
-    }];
-}
-</code></pre><p><strong>CollectionViewDataSource.m</strong></p>
-<pre><code>- (UICollectionViewCell *)<span class="string">collectionView:</span>(UICollectionView *)collectionView <span class="string">cellForItemAtIndexPath:</span>(NSIndexPath *)indexPath{
-<span class="string">cellForItemAtIndexPath:</span>(NSIndexPath *)indexPath{
-    LIHomeImageCell *cell = [collectionView <span class="string">dequeueReusableCellWithReuseIdentifier:</span>@<span class="string">"CollectionIdentifier"</span> <span class="string">forIndexPath:</span>indexPath];
-    <span class="keyword">if</span> (cell == nil) {
-        cell = [[LIHomeImageCell alloc] init];
+<h3 id="AbsoluteValuable">AbsoluteValuable</h3><p>这个协议定义了一个静态方法，名曰<code>public static func abs(x: Self) -&gt; Self</code>，所以实现这个协议后可以作类似<code>T.abs(x)</code>的调用，在Swift标准库中，<code>Float</code>,<code>Float80</code>和<code>Double</code>实现了这个协议，所以可以写出如下的代码：</p>
+<pre><code>print<span class="list">(<span class="keyword">Float</span>.abs<span class="list">(<span class="keyword">-4</span>)</span>)</span>
+print<span class="list">(<span class="keyword">Double</span>.abs<span class="list">(<span class="keyword">-9</span>.<span class="number">99</span>)</span>)</span>
+print<span class="list">(<span class="keyword">Int</span>.abs<span class="list">(<span class="keyword">-1</span>)</span>)</span>
+</code></pre><p>这段代码的第三行是会报错的，因为<code>Int</code>没有实现这个协议，我们也可以自己定义一个extension帮助Int实现这个需求：</p>
+<pre><code>extension <span class="keyword">Int</span>: AbsoluteValuable {
+    <span class="keyword">public</span> <span class="keyword">static</span> func <span class="keyword">abs</span>(x: <span class="keyword">Int</span>) -&gt; <span class="keyword">Int</span> {
+        <span class="keyword">return</span> x &gt; <span class="number">0</span> ? x : -x
     }
-    cell.backgroundColor = [UIColor lightGrayColor];
-    LIImage *li = [[LIImage alloc] <span class="string">initWithConfig:</span>[self.pictures <span class="string">objectAtIndex:</span>[indexPath row]]];
-    [cell <span class="string">configueCellWithImage:</span>li <span class="string">atIndexpath:</span>indexPath];
-    <span class="keyword">return</span> cell;
 }
-</code></pre><p><strong>CollectionViewCell.m</strong></p>
-<pre><code>- (<span class="keyword">void</span>)configueCellWithImage:(LIImage *)image atIndexpath:(<span class="built_in">NSIndexPath</span>*)indexPath{
-    SDWebImageManager *manager = [SDWebImageManager sharedManager];
-    __<span class="keyword">weak</span> __<span class="keyword">typeof</span>(<span class="keyword">self</span>) weakSelf = <span class="keyword">self</span>;
-    [manager downloadImageWithURL:[<span class="built_in">NSURL</span> URLWithString:image<span class="variable">.smallImageUrl</span>] options:<span class="number">0</span> progress:<span class="literal">nil</span> completed:^(<span class="built_in">UIImage</span> *image, <span class="built_in">NSError</span> *error, SDImageCacheType cacheType, <span class="built_in">BOOL</span> finished, <span class="built_in">NSURL</span> *imageURL) {
-        __<span class="keyword">strong</span> __<span class="keyword">typeof</span>(weakSelf) strongSelf = weakSelf;
-        strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = image;
-    }];
+
+<span class="keyword">print</span>(<span class="keyword">Int</span>.<span class="keyword">abs</span>(-<span class="number">2</span>))
+</code></pre><p>这样就可以顺利使用这个方法了。</p>
+<h3 id="SignedNumberType">SignedNumberType</h3><p>这个协议定义了<code>-</code>运算，包括单目运算(类似于<code>-(-5) = 5</code>)以及双目运算，实现这个协议后，就可以进行常用的带有<code>-</code>的运算了,如上面提到的<code>AbsoluteValuable</code>就实现了这个协议，所以我们才能写出<code>print(Float.abs(-4))</code>这样的代码。<code>Int</code>、<code>Double</code>、<code>Float</code>等类型也实现了这个协议。</p>
+<h3 id="Equatable_&amp;_Hashable">Equatable &amp; Hashable</h3><p>实现了这两个协议，两个对象之间才能做比较。常用的基本类型都实现了<code>Hashable</code>协议，我们也可以自定义一个实现协议的对象：</p>
+<pre><code><span class="keyword">public</span> struct <span class="string">MyStruct:</span> Hashable {
+    var <span class="string">name:</span> String
+    var <span class="string">address:</span> String
+
+    <span class="keyword">public</span> var <span class="string">hashValue:</span> Int {
+        <span class="keyword">return</span> name.hashValue ^ address.hashValue
+    }
 }
-</code></pre><a id="more"></a>
-<p>代码写好之后运行，发现两个问题：</p>
-<ol>
-<li>有些cell在加载的时候会<em>闪到别的图片</em>，然后<em>跳回正确的图片</em>，这种cell在已加载过的cell里面和新添加的cell里都会出现。滑动屏幕时也会出现。</li>
-<li>有些cell在读取时会最终<em>显示同一张图片</em>，显然有一个cell的行为是错误的，当这些cell <em>划出屏幕再划进时</em>，两个cell的图片显示正确了。</li>
-</ol>
-<h2 id="研究问题">研究问题</h2><p>查阅了StackOverflow以及一些博客后，认为这两个问题可能由以下情况导致：</p>
-<ul>
-<li>cell在滑动时会准备复用，调用的是<code>- (void)prepareForReuse</code>方法，如果没有正确设置这个方法，那么滑动复用的时候会先显示原来的图片，再加载新的图片。</li>
-<li>在项目中加载图片的方式是后台线程加载，这样会涉及资源的竞争，特别是在屏幕滑动的时候，如果前面的cell没有加载完成，就要准备复用到别的cell，这时候当前面的cell中的图片加载完成时，这个cell会认为OK了，不会再加载新的cell了。</li>
-<li>之前提到在项目中分页加载时会reload所有的cell，这并不是一种非常好的方式，可用<code>- (void)insertItemsAtIndexPaths:(NSArray&lt;NSIndexPath *&gt; *)indexPaths</code>代替之。</li>
-</ul>
-<h2 id="解决方案">解决方案</h2><ul>
-<li><p>在<code>ViewController.m</code>的<code>- (void)loadPicture</code>中添加以下代码：</p>
-<pre><code><span class="tag">if</span> ([strongSelf.pictures count] == [strongSelf.picsToShow count]) { 
-    <span class="attr_selector">[strongSelf.picView reloadData]</span>;
-} <span class="tag">else</span> {
-    <span class="attr_selector">[strongSelf.picView insertItemsAtIndexPaths:indexPaths]</span>;
-}    
-</code></pre></li>
-</ul>
-<p>判断条件为第一次加载时，reload所有数据；否则仅仅插入新获得的数据。</p>
-<ul>
-<li><p>在<code>cellForItemAtIndexPath</code> 这个方法中添加下面的代码(加到cell创建后):</p>
-<pre><code>cell.tag = indexPath.row<span class="comment">;</span>
-cell.homeImage.image = nil<span class="comment">;</span>
-</code></pre></li>
-<li><p>在<code>CollectionViewCell.m</code>中,加入<code>- (void)prepareForReuse</code>方法：</p>
-<pre><code>- (<span class="keyword">void</span>)prepareForReuse{
-    [<span class="keyword">super</span> prepareForReuse];
-    [<span class="keyword">self</span><span class="variable">.homeImage</span> sd_cancelCurrentImageLoad];
-    <span class="keyword">self</span><span class="variable">.homeImage</span><span class="variable">.image</span> = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@"placeholder.png"</span>];
+
+<span class="keyword">public</span> func ==(<span class="string">lhs:</span> MyStruct, <span class="string">rhs:</span> MyStruct) -&gt; Bool {
+    <span class="keyword">return</span> lhs.hashValue == rhs.hashValue
 }
-</code></pre></li>
-<li><p>重写<code>- (void)configueCellWithImage:(LIImage *)image atIndexpath:(NSIndexPath*)indexPath</code>方法:</p>
-<pre><code>- (<span class="keyword">void</span>)configueCellWithImage:(LIImage *)image atIndexpath:(<span class="built_in">NSIndexPath</span>*)indexPath{
-    SDWebImageManager *manager = [SDWebImageManager sharedManager];
-    __<span class="keyword">weak</span> __<span class="keyword">typeof</span>(<span class="keyword">self</span>) weakSelf = <span class="keyword">self</span>;
-    [manager downloadImageWithURL:[<span class="built_in">NSURL</span> URLWithString:image<span class="variable">.smallImageUrl</span>] options:<span class="number">0</span> progress:<span class="literal">nil</span> completed:^(<span class="built_in">UIImage</span> *image, <span class="built_in">NSError</span> *error, SDImageCacheType cacheType, <span class="built_in">BOOL</span> finished, <span class="built_in">NSURL</span> *imageURL) {
-        __<span class="keyword">strong</span> __<span class="keyword">typeof</span>(weakSelf) strongSelf = weakSelf;
-        <span class="keyword">if</span> (strongSelf<span class="variable">.tag</span> == indexPath<span class="variable">.row</span>) {
-            strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = image;
-        } <span class="keyword">else</span> {
-            strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@"placeholder.png"</span>];
-        }
-    }];
+
+let struct1 = MyStruct(<span class="string">name:</span> <span class="string">"messi"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
+let struct2 = MyStruct(<span class="string">name:</span> <span class="string">"aguero"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
+let struct3 = MyStruct(<span class="string">name:</span> <span class="string">"aguero"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
+
+print(struct1 == struct2)
+<span class="comment">// prints: "false\n"</span>
+print(struct2 == struct3)
+<span class="comment">// prints: "true\n"</span>
+</code></pre><h3 id="Comparable">Comparable</h3><p>可以比较大小的协议，有四个方法需要实现，和<code>Equatable</code>类似。</p>
+<h3 id="XXXLiteralConvertible">XXXLiteralConvertible</h3><p>直接进行语义转换的协议，具体有<code>IntegerLiteralConvertible</code>,<code>ArrayLiteralConvertible</code>,<code>DictionaryLiteralConvertible</code>,<code>NilLiteralConvertible</code>,<code>BooleanLiteralConvertible</code>,<code>ExtendedGraphemeClusterLiteralConvertible</code>,<code>FloatLiteralConvertible</code>,<code>UnicodeScalarLiteralConvertible</code>,<code>StringLiteralConvertible</code>,实现这些协议并指定构造方法后，就可以直接给对象通过赋值的方式进行初始化了。</p>
+<p>假设我们有一个Circle的结构体：</p>
+<pre><code>struct Circle {
+    <span class="variable"><span class="keyword">var</span> radius</span>: <span class="typename">Float</span>
+    <span class="variable"><span class="keyword">var</span> area</span>: <span class="typename">Float</span>
 }
-</code></pre></li>
-</ul>
-<p>逻辑中的判断是预防cell显示错误的图片。实际上，当采用insert方法插入新cell后，目前尚未发现cell会显示错误。</p>
-<h2 id="总结">总结</h2><p>采用了以上方法后，问题得到了解决。SDWebImage确实是一个很好用的库，既解决了滑动时卡顿的问题，又做了图片缓存，可以使开发者重点关注业务方面。但同时这种后台加载配合UICollectionView或UITableView使用时的问题也要注意。</p>
-<h2 id="参考资料">参考资料</h2><ul>
-<li><a href="http://stackoverflow.com/questions/18756580/uicollectionview-sdwebimage-cell-reuse" target="_blank" rel="external">UICollectionView + SDWebImage + Cell reuse</a></li>
-<li><a href="http://iswwwup.com/t/fbc42bab1dff/ios-sdwebimage-with-reusable-cell-issue.html" target="_blank" rel="external">SDWebImage with reusable cell issue</a></li>
-<li><a href="http://stackoverflow.com/questions/15668160/asynchronous-downloading-of-images-for-uitableview-with-gcd" target="_blank" rel="external">Asynchronous downloading of images for UITableView with GCD</a></li>
-<li><a href="http://stackoverflow.com/questions/12611292/uicollectionview-assertion-failure" target="_blank" rel="external">UICollectionView Assertion failure</a></li>
-</ul>
-</span>
+</code></pre><p>我们可以添加语义初始化方法，比如用半径赋值初始化后，计算出面积：</p>
+<pre><code><span class="class"><span class="keyword">extension</span> <span class="title">Circle</span>: <span class="title">FloatLiteralConvertible</span> </span>{
+    <span class="keyword">init</span>(floatLiteral value: <span class="type">Float</span>) {
+        radius = value
+        area = <span class="number">3.14</span> * radius * radius
+    }
+}
+
+<span class="keyword">let</span> myCircle: <span class="type">Circle</span> = <span class="number">5.0</span>
+<span class="built_in">print</span>(myCircle.area)
+<span class="comment">// Prints: "78.5\n"</span>
+</code></pre><h3 id="Strideable">Strideable</h3><p>Stride, 是大踏步的意思。 遵循这个协议的类型可以返回一组不连续的数字，或是<strong>踏步向前</strong>，或是求两个实例间的步长。<code>Int</code>, <code>Double</code>, <code>Float</code>等都实现了这个协议。这个协议定义了下面的方法：</p>
+<pre><code>public <span class="func"><span class="keyword">func</span> <span class="title">distanceTo</span><span class="params">(other: <span class="keyword">Self</span>)</span></span> -&gt; <span class="type">Self</span>.<span class="type">Stride</span>
+public <span class="func"><span class="keyword">func</span> <span class="title">advancedBy</span><span class="params">(n: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">Self</span>
+public <span class="func"><span class="keyword">func</span> <span class="title">stride</span><span class="params">(to end: <span class="keyword">Self</span>, by stride: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">StrideTo</span>&lt;<span class="type">Self</span>&gt;
+public <span class="func"><span class="keyword">func</span> <span class="title">stride</span><span class="params">(through end: <span class="keyword">Self</span>, by stride: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">StrideThrough</span>&lt;<span class="type">Self</span>&gt;
+</code></pre><p>对于前两个方法，具体用法如下:</p>
+<pre><code><span class="tag">var</span> <span class="tag">a</span>: Int = <span class="number">0</span>
+<span class="tag">var</span> <span class="tag">b</span>: Int = <span class="number">5</span>
+
+<span class="function"><span class="title">print</span><span class="params">(a.advancedBy(<span class="number">5</span>)</span></span> == b)
+<span class="comment">// prints: "true\n"</span>
+<span class="function"><span class="title">print</span><span class="params">(a.distanceTo(b)</span></span> == <span class="tag">b</span> - a)
+<span class="comment">// prints: "true\n"</span>
+</code></pre><p>对于后两个方法，区别是<code>StrideTo</code>得到的集合不会包含<code>end</code>,而<code>StrideThrough</code>会包含<code>end</code>，举例如下：</p>
+<pre><code>var <span class="operator"><span class="keyword">start</span>: <span class="built_in">Int</span> = <span class="number">0</span>
+<span class="keyword">var</span> <span class="keyword">end</span>: <span class="built_in">Int</span> = <span class="number">5</span>
+<span class="keyword">var</span> <span class="keyword">to</span> = (<span class="keyword">start</span>.stride(<span class="keyword">to</span>: <span class="keyword">end</span>, <span class="keyword">by</span>: <span class="number">1</span>))
+<span class="keyword">var</span> <span class="keyword">through</span> = (<span class="keyword">start</span>.stride(<span class="keyword">through</span>: <span class="keyword">end</span>, <span class="keyword">by</span>: <span class="number">1</span>))
+
+print(<span class="keyword">to</span>.maxElement())
+// prints: <span class="string">"Optional(4)\n"</span>
+print(<span class="keyword">through</span>.maxElement())
+// prints: <span class="string">"Optional(5)\n"</span></span>
+</code></pre></span>
       
     </div>
 
@@ -353,7 +340,7 @@ cell.homeImage.image = nil<span class="comment">;</span>
       
         <div class="post-tags">
           
-            <a href="/tags/iOS/" rel="tag">#iOS</a>
+            <a href="/tags/Swift/" rel="tag">#Swift</a>
           
         </div>
       
@@ -362,13 +349,11 @@ cell.homeImage.image = nil<span class="comment">;</span>
         <div class="post-nav">
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/08/24/iOS中使用MPMoviePlayerController播放m3u8直播源以及播放器的简单定制/" rel="prev">iOS中使用MPMoviePlayerController播放m3u8直播源以及播放器的简单定制</a>
-            
           </div>
 
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/07/23/关于NSData末尾为Null-terminated的处理/" rel="next">关于NSData末尾为Null-terminated的处理</a>
+              <a href="/2015/11/11/自定义HTTP请求的Cookie/" rel="next">自定义HTTP请求的Cookie</a>
             
           </div>
         </div>
@@ -513,7 +498,7 @@ cell.homeImage.image = nil<span class="comment">;</span>
           <div class="post-toc">
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本思路"><span class="nav-number">2.</span> <span class="nav-text">基本思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#研究问题"><span class="nav-number">3.</span> <span class="nav-text">研究问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#解决方案"><span class="nav-number">4.</span> <span class="nav-text">解决方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考资料"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#AbsoluteValuable"><span class="nav-number">1.</span> <span class="nav-text">AbsoluteValuable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SignedNumberType"><span class="nav-number">2.</span> <span class="nav-text">SignedNumberType</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Equatable_&_Hashable"><span class="nav-number">3.</span> <span class="nav-text">Equatable & Hashable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Comparable"><span class="nav-number">4.</span> <span class="nav-text">Comparable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#XXXLiteralConvertible"><span class="nav-number">5.</span> <span class="nav-text">XXXLiteralConvertible</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Strideable"><span class="nav-number">6.</span> <span class="nav-text">Strideable</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator"></div>
@@ -567,9 +552,9 @@ cell.homeImage.image = nil<span class="comment">;</span>
 
     <script type="text/javascript">
       var disqus_shortname = 'clutchlazy';
-      var disqus_identifier = '2015/08/19/关于UICollectionViewCell异步加载图片的优化/';
-      var disqus_title = '关于UICollectionViewCell异步加载图片的优化';
-      var disqus_url = 'http://lazyclutch.github.io/2015/08/19/关于UICollectionViewCell异步加载图片的优化/';
+      var disqus_identifier = '2015/11/23/Swift中的一些内置协议/';
+      var disqus_title = 'Swift中的一些内置协议';
+      var disqus_url = 'http://lazyclutch.github.io/2015/11/23/Swift中的一些内置协议/';
 
       function run_disqus_script(disqus_script){
         var dsq = document.createElement('script');
