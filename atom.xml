@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title><![CDATA[LazyClutch's Workstation]]></title>
+  <subtitle><![CDATA[Més que un persona]]></subtitle>
+  <link href="/atom.xml" rel="self"/>
+  <link href="http://lazyclutch.github.io/"/>
+  <updated>2015-11-24T06:43:14.000Z</updated>
+  <id>http://lazyclutch.github.io/</id>
+  
+  <author>
+    <name><![CDATA[LazyClutch]]></name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title><![CDATA[Swift中的一些内置协议]]></title>
+    <link href="http://lazyclutch.github.io/2015/11/23/Swift%E4%B8%AD%E7%9A%84%E4%B8%80%E4%BA%9B%E5%86%85%E7%BD%AE%E5%8D%8F%E8%AE%AE/"/>
+    <id>http://lazyclutch.github.io/2015/11/23/Swift中的一些内置协议/</id>
+    <published>2015-11-23T07:05:49.000Z</published>
+    <updated>2015-11-24T06:43:14.000Z</updated>
+    <content type="html"><![CDATA[<p>Written by Lazy</p>
+<hr>
+<h3 id="AbsoluteValuable">AbsoluteValuable</h3><p>这个协议定义了一个静态方法，名曰<code>public static func abs(x: Self) -&gt; Self</code>，所以实现这个协议后可以作类似<code>T.abs(x)</code>的调用，在Swift标准库中，<code>Float</code>,<code>Float80</code>和<code>Double</code>实现了这个协议，所以可以写出如下的代码：</p>
+<pre><code>print<span class="list">(<span class="keyword">Float</span>.abs<span class="list">(<span class="keyword">-4</span>)</span>)</span>
+print<span class="list">(<span class="keyword">Double</span>.abs<span class="list">(<span class="keyword">-9</span>.<span class="number">99</span>)</span>)</span>
+print<span class="list">(<span class="keyword">Int</span>.abs<span class="list">(<span class="keyword">-1</span>)</span>)</span>
+</code></pre><p>这段代码的第三行是会报错的，因为<code>Int</code>没有实现这个协议，我们也可以自己定义一个extension帮助Int实现这个需求：</p>
+<pre><code>extension <span class="keyword">Int</span>: AbsoluteValuable {
+    <span class="keyword">public</span> <span class="keyword">static</span> func <span class="keyword">abs</span>(x: <span class="keyword">Int</span>) -&gt; <span class="keyword">Int</span> {
+        <span class="keyword">return</span> x &gt; <span class="number">0</span> ? x : -x
+    }
+}
+
+<span class="keyword">print</span>(<span class="keyword">Int</span>.<span class="keyword">abs</span>(-<span class="number">2</span>))
+</code></pre><p>这样就可以顺利使用这个方法了。</p>
+<a id="more"></a>
+<h3 id="SignedNumberType">SignedNumberType</h3><p>这个协议定义了<code>-</code>运算，包括单目运算(类似于<code>-(-5) = 5</code>)以及双目运算，实现这个协议后，就可以进行常用的带有<code>-</code>的运算了,如上面提到的<code>AbsoluteValuable</code>就实现了这个协议，所以我们才能写出<code>print(Float.abs(-4))</code>这样的代码。<code>Int</code>、<code>Double</code>、<code>Float</code>等类型也实现了这个协议。</p>
+<h3 id="Equatable_&amp;_Hashable">Equatable &amp; Hashable</h3><p>实现了这两个协议，两个对象之间才能做比较。常用的基本类型都实现了<code>Hashable</code>协议，我们也可以自定义一个实现协议的对象：</p>
+<pre><code><span class="keyword">public</span> struct <span class="string">MyStruct:</span> Hashable {
+    var <span class="string">name:</span> String
+    var <span class="string">address:</span> String
+
+    <span class="keyword">public</span> var <span class="string">hashValue:</span> Int {
+        <span class="keyword">return</span> name.hashValue ^ address.hashValue
+    }
+}
+
+<span class="keyword">public</span> func ==(<span class="string">lhs:</span> MyStruct, <span class="string">rhs:</span> MyStruct) -&gt; Bool {
+    <span class="keyword">return</span> lhs.hashValue == rhs.hashValue
+}
+
+let struct1 = MyStruct(<span class="string">name:</span> <span class="string">"messi"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
+let struct2 = MyStruct(<span class="string">name:</span> <span class="string">"aguero"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
+let struct3 = MyStruct(<span class="string">name:</span> <span class="string">"aguero"</span>, <span class="string">address:</span> <span class="string">"bcn"</span>)
+
+print(struct1 == struct2)
+<span class="comment">// prints: "false\n"</span>
+print(struct2 == struct3)
+<span class="comment">// prints: "true\n"</span>
+</code></pre><h3 id="Comparable">Comparable</h3><p>可以比较大小的协议，有四个方法需要实现，和<code>Equatable</code>类似。</p>
+<h3 id="XXXLiteralConvertible">XXXLiteralConvertible</h3><p>直接进行语义转换的协议，具体有 <code>IntegerLiteralConvertible</code>,<code>ArrayLiteralConvertible</code>,<code>DictionaryLiteralConvertible</code>,<br><code>NilLiteralConvertible</code>,<code>BooleanLiteralConvertible</code>,<code>ExtendedGraphemeClusterLiteralConvertible</code>,<br><code>FloatLiteralConvertible</code>,<code>UnicodeScalarLiteralConvertible</code>,<code>StringLiteralConvertible</code>,实现这些协议并指定构造方法后，就可以直接给对象通过赋值的方式进行初始化了。</p>
+<p>假设我们有一个Circle的结构体：</p>
+<pre><code>struct Circle {
+    <span class="variable"><span class="keyword">var</span> radius</span>: <span class="typename">Float</span>
+    <span class="variable"><span class="keyword">var</span> area</span>: <span class="typename">Float</span>
+}
+</code></pre><p>我们可以添加语义初始化方法，比如用半径赋值初始化后，计算出面积：</p>
+<pre><code><span class="class"><span class="keyword">extension</span> <span class="title">Circle</span>: <span class="title">FloatLiteralConvertible</span> </span>{
+    <span class="keyword">init</span>(floatLiteral value: <span class="type">Float</span>) {
+        radius = value
+        area = <span class="number">3.14</span> * radius * radius
+    }
+}
+
+<span class="keyword">let</span> myCircle: <span class="type">Circle</span> = <span class="number">5.0</span>
+<span class="built_in">print</span>(myCircle.area)
+<span class="comment">// Prints: "78.5\n"</span>
+</code></pre><h3 id="Strideable">Strideable</h3><p>Stride, 是大踏步的意思。 遵循这个协议的类型可以返回一组不连续的数字，或是<strong>踏步向前</strong>，或是求两个实例间的步长。<code>Int</code>, <code>Double</code>, <code>Float</code>等都实现了这个协议。这个协议定义了下面的方法：</p>
+<pre><code>public <span class="func"><span class="keyword">func</span> <span class="title">distanceTo</span><span class="params">(other: <span class="keyword">Self</span>)</span></span> -&gt; <span class="type">Self</span>.<span class="type">Stride</span>
+public <span class="func"><span class="keyword">func</span> <span class="title">advancedBy</span><span class="params">(n: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">Self</span>
+public <span class="func"><span class="keyword">func</span> <span class="title">stride</span><span class="params">(to end: <span class="keyword">Self</span>, by stride: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">StrideTo</span>&lt;<span class="type">Self</span>&gt;
+public <span class="func"><span class="keyword">func</span> <span class="title">stride</span><span class="params">(through end: <span class="keyword">Self</span>, by stride: <span class="keyword">Self</span>.Stride)</span></span> -&gt; <span class="type">StrideThrough</span>&lt;<span class="type">Self</span>&gt;
+</code></pre><p>对于前两个方法，具体用法如下:</p>
+<pre><code><span class="tag">var</span> <span class="tag">a</span>: Int = <span class="number">0</span>
+<span class="tag">var</span> <span class="tag">b</span>: Int = <span class="number">5</span>
+
+<span class="function"><span class="title">print</span><span class="params">(a.advancedBy(<span class="number">5</span>)</span></span> == b)
+<span class="comment">// prints: "true\n"</span>
+<span class="function"><span class="title">print</span><span class="params">(a.distanceTo(b)</span></span> == <span class="tag">b</span> - a)
+<span class="comment">// prints: "true\n"</span>
+</code></pre><p>对于后两个方法，区别是<code>StrideTo</code>得到的集合不会包含<code>end</code>,而<code>StrideThrough</code>会包含<code>end</code>，举例如下：</p>
+<pre><code>var <span class="operator"><span class="keyword">start</span>: <span class="built_in">Int</span> = <span class="number">0</span>
+<span class="keyword">var</span> <span class="keyword">end</span>: <span class="built_in">Int</span> = <span class="number">5</span>
+<span class="keyword">var</span> <span class="keyword">to</span> = (<span class="keyword">start</span>.stride(<span class="keyword">to</span>: <span class="keyword">end</span>, <span class="keyword">by</span>: <span class="number">1</span>))
+<span class="keyword">var</span> <span class="keyword">through</span> = (<span class="keyword">start</span>.stride(<span class="keyword">through</span>: <span class="keyword">end</span>, <span class="keyword">by</span>: <span class="number">1</span>))
+
+print(<span class="keyword">to</span>.maxElement())
+// prints: <span class="string">"Optional(4)\n"</span>
+print(<span class="keyword">through</span>.maxElement())
+// prints: <span class="string">"Optional(5)\n"</span></span>
+</code></pre>]]></content>
+    <summary type="html">
+    <![CDATA[<p>Written by Lazy</p>
+<hr>
+<h3 id="AbsoluteValuable">AbsoluteValuable</h3><p>这个协议定义了一个静态方法，名曰<code>public static func abs(x: Self) -&gt; Self</code>，所以实现这个协议后可以作类似<code>T.abs(x)</code>的调用，在Swift标准库中，<code>Float</code>,<code>Float80</code>和<code>Double</code>实现了这个协议，所以可以写出如下的代码：</p>
+<pre><code>print<span class="list">(<span class="keyword">Float</span>.abs<span class="list">(<span class="keyword">-4</span>)</span>)</span>
+print<span class="list">(<span class="keyword">Double</span>.abs<span class="list">(<span class="keyword">-9</span>.<span class="number">99</span>)</span>)</span>
+print<span class="list">(<span class="keyword">Int</span>.abs<span class="list">(<span class="keyword">-1</span>)</span>)</span>
+</code></pre><p>这段代码的第三行是会报错的，因为<code>Int</code>没有实现这个协议，我们也可以自己定义一个extension帮助Int实现这个需求：</p>
+<pre><code>extension <span class="keyword">Int</span>: AbsoluteValuable {
+    <span class="keyword">public</span> <span class="keyword">static</span> func <span class="keyword">abs</span>(x: <span class="keyword">Int</span>) -&gt; <span class="keyword">Int</span> {
+        <span class="keyword">return</span> x &gt; <span class="number">0</span> ? x : -x
+    }
+}
+
+<span class="keyword">print</span>(<span class="keyword">Int</span>.<span class="keyword">abs</span>(-<span class="number">2</span>))
+</code></pre><p>这样就可以顺利使用这个方法了。</p>]]>
+    
+    </summary>
+    
+      <category term="Swift" scheme="http://lazyclutch.github.io/tags/Swift/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[自定义HTTP请求的Cookie]]></title>
+    <link href="http://lazyclutch.github.io/2015/11/11/%E8%87%AA%E5%AE%9A%E4%B9%89HTTP%E8%AF%B7%E6%B1%82%E7%9A%84Cookie/"/>
+    <id>http://lazyclutch.github.io/2015/11/11/自定义HTTP请求的Cookie/</id>
+    <published>2015-11-11T07:32:03.000Z</published>
+    <updated>2015-11-24T06:44:16.000Z</updated>
+    <content type="html"><![CDATA[<p>Written by Lazy</p>
+<hr>
+<p>上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。</p>
+<h3 id="查找问题">查找问题</h3><p>之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开<a href="http://shanghaicity.openservice.kankanews.com/public/bus/mes/sid/0db6ca4f4b3b83c70a59ef3cdbe003b6" target="_blank" rel="external">某页面</a>,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。</p>
+<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_mms.png" alt="wechat" title="wechat"></p>
+<a id="more"></a>
+<p>于是打开<a href="http://www.charlesproxy.com/" target="_blank" rel="external">Charles</a>，使用微信进入公众号，看一下用正确的步骤访问发出的API有什么奥秘：</p>
+<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_wechat.png" alt="weixin" title="weixin"></p>
+<p>最值得怀疑的地方当然是<code>User-Agent</code>，因为一般判断是否为微信访问都是用这个字段判断的，稍微值得怀疑的地方有<code>Cookie</code>和<code>Referer</code>。于是打开<a href="https://chrome.google.com/webstore/detail/dhc-resthttp-api-client/aejoelaoggembcahagimdiliamlcdmfm?hl=en" target="_blank" rel="external">DHC</a>，采用控制变量法试图重现这个访问。结果是：</p>
+<ul>
+<li>仅复制<code>User-Agent</code>后，不可访问</li>
+<li>仅复制<code>Cookie</code>后，可以访问</li>
+<li>仅复制<code>Referer</code>后，不可访问</li>
+</ul>
+<p>那么关键点就是Cookie了，该Cookie是长长的一串：</p>
+<pre><code>Hm_lpvt_6f69830ae7173059e935b61372431b35=<span class="number">1447228192</span>; Hm_lvt_6f69830ae7173059e935b61372431b35=<span class="number">1447038184</span>,<span class="number">1447137058</span>,<span class="number">1447215960</span>,<span class="number">1447216445</span>; ansoecdxc=oY1pTw1R0Nhy7b_Z2A78eRuc8_j8; HA=<span class="number">00f</span>5d65f902d3087437b72fcff198dc65804d0f6; HB=MDBmNWQ2NWY5MDJkMzA4NzQzN2I3MmZjZmYxOThkYzY1ODA0ZDBmNg==; HC=<span class="number">9</span>d0e47e289930755027528ba66fe8445ac00ac59; HD=MjAxNTExMTE=; HG=<span class="number">1466112</span>a248d3106f14675fc55fddd3155d19d64; HH=<span class="number">5144</span>d4292cdb6379a557a5b07b7780e201c7e1fa; HK=<span class="number">19</span>c1ef297a9e75c4dd74c88d89210f4d7af5c7f8; HO=TWpBeE5URXhNVEU9MTVNakl5TmpZPTQ5VFc5NmFXeHNZUzgxTGpBZ0tHbFFhRzl1WlRzZ1ExQlZJR2xRYUc5dVpTQlBVeUE1WHpFZ2JHbHJaU0JOWVdNZ1QxTWdXQ2tnUVhCd2JHVlhaV0pMYVhRdk5qQXhMakV1TkRZZ0tFdElWRTFNTENCc2FXdGxJRWRsWTJ0dktTQk5iMkpwYkdVdk1UTkNNVFF6SUUxcFkzSnZUV1Z6YzJWdVoyVnlMell1TXk0MklFNWxkRlI1Y0dVdlYwbEdTU0JNWVc1bmRXRm5aUzk2YUY5RFRnPT1kZDcwZDVjMGZhODZiYjk4MGJkZWY3MTEwY2JlYjFkODk4ZTczNDk2; HY=MjAxNTExMTE=<span class="number">19</span>c1ef297a9e75c4dd74c88d89210f4d7af5c7f81466112a248d3106f14675fc55fddd3155d19d64dd70d5c0fa86bb980bdef7110cbeb1d898e73496; Hm_1vt_6f69830ae7173059e935b61372431b35=KnmCelZC8x9GIH8bCd6nAg==; Hm_p1vt_6f69830ae7173059e935b61372431b35=KnmCelZC8yVGIH8bCd61Ag==; _ga=GA1<span class="number">.2</span><span class="number">.1317140790</span><span class="number">.1447137058</span>; _gat=<span class="number">1</span>
+</code></pre><p>继续采用控制变量法一点点删掉Cookie，最终，能够访问的最短Cookie是这么一串：</p>
+<pre><code>ansoecdxc
+</code></pre><h3 id="自定义访问的Cookie">自定义访问的Cookie</h3><p>有了上面一串东西，下面要做的就是自己组装一个Cookie了，代码如下：</p>
+<pre><code>let cookieValue = <span class="built_in">NSHTTPCookie</span>(properties: [
+    <span class="built_in">NSHTTPCookieDomain</span>: <span class="string">"shanghaicity.openservice.kankanews.com"</span>,
+    <span class="built_in">NSHTTPCookiePath</span>: <span class="string">"/"</span>,
+    <span class="built_in">NSHTTPCookieName</span>: <span class="string">"Hm_p1vt_6f69830ae7173059e935b61372431b35"</span>,
+    <span class="built_in">NSHTTPCookieValue</span>: <span class="string">"; ansoecdxc=oY1pTw1R0Nhy7b_Z2A78eRuc8_j8"</span>,
+    <span class="built_in">NSHTTPCookieExpires</span>: <span class="built_in">NSDate</span>(timeIntervalSinceNow: oneYearInSeconds)
+])
+manager<span class="variable">.session</span><span class="variable">.configuration</span><span class="variable">.HTTPCookieStorage</span>?<span class="variable">.setCookie</span>(cookieValue!)
+</code></pre><p>其中，<code>NSHTTPCookieDomain</code>, <code>NSHTTPCookiePath</code>, <code>NSHTTPCookieName</code>这三个是缺一不可的，否则这个对象就是nil，<code>NSHTTPCookieValue</code>设置时在前面加了个分号，以便和name隔开。<br>设置好了之后，打开应用开始访问，结果仍然失败，用<code>print(manager.session.configuration.HTTPCookieStorage?.cookies)</code>打印cookies查看，发现里面有两个Cookies:</p>
+<pre><code>Optional([
+&lt;NSHTTPCookie version:<span class="number">0</span> name:<span class="string">"Hm_p1vt_6f69830ae7173059e935b61372431b35"</span> value:<span class="string">"; ansoecdxc=oY1pTw1R0Nhy7b_Z2A78eRuc8_j8"</span> expiresDate:<span class="number">2016</span>-<span class="number">11</span>-<span class="number">10</span> <span class="number">08</span>:<span class="number">11</span>:<span class="number">24</span> +<span class="number">0000</span> created:<span class="number">2015</span>-<span class="number">11</span>-<span class="number">11</span> <span class="number">08</span>:<span class="number">11</span>:<span class="number">24</span> +<span class="number">0000</span> sessionOnly:FALSE domain:<span class="string">"shanghaicity.openservice.kankanews.com"</span> path:<span class="string">"/"</span> isSecure:FALSE&gt;, 
+&lt;NSHTTPCookie version:<span class="number">0</span> name:<span class="string">"Hm_p1vt_6f69830ae7173059e935b61372431b35"</span> value:<span class="string">"a7d3553e9caab5ffe189a0d77b42df46"</span> expiresDate:(null) created:<span class="number">2015</span>-<span class="number">11</span>-<span class="number">11</span> <span class="number">08</span>:<span class="number">11</span>:<span class="number">17</span> +<span class="number">0000</span> sessionOnly:TRUE domain:<span class="string">"shanghaicity.openservice.kankanews.com"</span> path:<span class="string">"/public/bus/mes/sid"</span> isSecure:FALSE&gt;
+])
+</code></pre><p>第二个cookie是服务端返回后添加的，必须要删掉，否则之后还是无法访问，采取的办法是每次调API前都清一遍Cookie，再加上自定义的Cookie:</p>
+<pre><code><span class="keyword">for</span> <span class="keyword">each</span> <span class="keyword">in</span> (manager.session.configuration.HTTPCookieStorage?.cookies)! {
+    manager.session.configuration.HTTPCookieStorage?.deleteCookie(<span class="keyword">each</span>);
+}
+</code></pre><p>于是终于抓到数据了~~</p>
+<h3 id="参考资料">参考资料</h3><p><a href="http://stackoverflow.com/questions/5954382/ios-is-it-possible-to-set-a-cookie-manually-using-sharedhttpcookiestorage-for-a" target="_blank" rel="external">iOS: Is it possible to set a cookie manually using sharedHTTPCookieStorage for a UIWebView?</a><br><a href="http://stackoverflow.com/questions/1852515/how-to-clear-cookies-from-nshttpcookiestorage-more-then-once" target="_blank" rel="external">How to clear cookies from NSHTTPCookieStorage more then once?</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Written by Lazy</p>
+<hr>
+<p>上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。</p>
+<h3 id="查找问题">查找问题</h3><p>之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开<a href="http://shanghaicity.openservice.kankanews.com/public/bus/mes/sid/0db6ca4f4b3b83c70a59ef3cdbe003b6">某页面</a>,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。</p>
+<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_mms.png" alt="wechat" title="wechat" /></p>]]>
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[关于iOS 9 HTTPS适配的问题]]></title>
+    <link href="http://lazyclutch.github.io/2015/11/03/%E5%85%B3%E4%BA%8EiOS9-HTTPS%E9%80%82%E9%85%8D%E7%9A%84%E9%97%AE%E9%A2%98/"/>
+    <id>http://lazyclutch.github.io/2015/11/03/关于iOS9-HTTPS适配的问题/</id>
+    <published>2015-11-03T11:40:53.000Z</published>
+    <updated>2015-11-11T07:33:36.000Z</updated>
+    <content type="html"><![CDATA[<p>今天把自己的手机升到了iOS9 发现自己写的LazyInsta报如下错误：</p>
+<blockquote>
+<p>CFNetwork SSLHandshake failed (-9824) NSURLSession/NSURLConnection HTTP load failed (kCFStreamErrorDomainSSL, -9824)</p>
+</blockquote>
+<p>原因是，iOS9 要求系统发送的网络请求统一使用TLS 1.2 SSL，详见<a href="http://www.cocoachina.com/ios/20150703/12392.html" target="_blank" rel="external">这篇文章</a>。</p>
+<p>于是，要将自己的应用做下适配，如果服务器已经启用了HTTPS，那还好。但如果没有启用，只要在自己的应用里加一个字段就行，打开<code>info.plist</code>，用xml方式打开后，加入下面的代码：</p>
+<pre><code><span class="tag">&lt;<span class="title">key</span>&gt;</span>NSAppTransportSecurity<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+<span class="tag">&lt;<span class="title">dict</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">key</span>&gt;</span>NSAllowsArbitraryLoads<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">true</span> / &gt;</span>
+<span class="tag">&lt;/<span class="title">dict</span>&gt;</span>
+</code></pre><p> 这样就可以了，但是这样做的风险是在上架时可能会被拒(Without specific reason),规避这种问题的方法是对特定的，没有使用HTTPS的domain添加特例，可以按照下面的格式在<code>info.plist</code>中配置。</p>
+<pre><code><span class="tag">&lt;<span class="title">key</span>&gt;</span>NSAppTransportSecurity<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+<span class="tag">&lt;<span class="title">dict</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">key</span>&gt;</span>NSExceptionDomains<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+    <span class="tag">&lt;<span class="title">dict</span>&gt;</span>
+        <span class="tag">&lt;<span class="title">key</span>&gt;</span>yourserver.com<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+        <span class="tag">&lt;<span class="title">dict</span>&gt;</span>
+            <span class="comment">&lt;!--Include to allow subdomains--&gt;</span>
+            <span class="tag">&lt;<span class="title">key</span>&gt;</span>NSIncludesSubdomains<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+            <span class="tag">&lt;<span class="title">true</span> /&gt;</span>
+            <span class="comment">&lt;!--Include to allow insecure HTTP requests--&gt;</span>
+            <span class="tag">&lt;<span class="title">key</span>&gt;</span>NSTemporaryExceptionAllowsInsecureHTTPLoads<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+            <span class="tag">&lt;<span class="title">true</span> /&gt;</span>
+            <span class="comment">&lt;!--Include to specify minimum TLS version--&gt;</span>
+            <span class="tag">&lt;<span class="title">key</span>&gt;</span>NSTemporaryExceptionMinumumTLSVersion<span class="tag">&lt;/<span class="title">key</span>&gt;</span>
+            <span class="tag">&lt;<span class="title">string</span>&gt;</span>TLSv1.1<span class="tag">&lt;/<span class="title">string</span>&gt;</span>
+        <span class="tag">&lt;/<span class="title">dict</span>&gt;</span>
+    <span class="tag">&lt;/<span class="title">dict</span>&gt;</span>
+<span class="tag">&lt;/<span class="title">dict</span>&gt;</span>
+</code></pre>]]></content>
+    <summary type="html">
+    <![CDATA[<p>今天把自己的手机升到了iOS9 发现自己写的LazyInsta报如下错误：</p>
+<blockquote>
+<p>CFNetwork SSLHandshake failed (-9824) NSURLSession/NSURLConnection HTTP load fa]]>
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[iOS Animations by Tutorials 阅读总结]]></title>
+    <link href="http://lazyclutch.github.io/2015/10/12/iOS-Animations-by-Tutorials-%E9%98%85%E8%AF%BB%E6%80%BB%E7%BB%93/"/>
+    <id>http://lazyclutch.github.io/2015/10/12/iOS-Animations-by-Tutorials-阅读总结/</id>
+    <published>2015-10-12T08:11:50.000Z</published>
+    <updated>2015-10-12T09:31:57.000Z</updated>
+    <content type="html"><![CDATA[<p>Written By Lazy</p>
+<hr>
+<h2 id="前言">前言</h2><p>十一放假回来之后花了大概四五天的时间把Raywenderlich出的这本<a href="http://www.raywenderlich.com/store/ios-animations-by-tutorials" target="_blank" rel="external">《iOS Animations by Tutorials》</a>读了一遍，感觉写的还是非常不错的，就借这个机会总结一下iOS里面涉及到animation最基本的内容。按照书中的顺序，依次总结如下：</p>
+<h2 id="View’s_Animation">View’s Animation</h2><h3 id="基本动画">基本动画</h3><p>基本动画是通过调用<code>+ (void)animateWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations</code>这个API实现的，这个方法可以处理view的frame、backgroundColor、alpha等各种view的property，使用起来极为方便，例如:</p>
+<pre><code>[UIView animateWithDuration:1.0f animations:^{
+    view.backgroundColor = [UIColor redColor]<span class="comment">;            </span>
+    view.alpha = 1.0f<span class="comment">;</span>
+}]<span class="comment">;</span>
+</code></pre><h3 id="弹簧动画">弹簧动画</h3><p>iOS 7之后新加的方法，API巨长无比：</p>
+<pre><code>+ <span class="params">(void)</span>animateWithDuration:<span class="params">(NSTimeInterval)</span>duration delay:<span class="params">(NSTimeInterval)</span>delay usingSpringWithDamping:<span class="params">(CGFloat)</span>dampingRatio initialSpringVelocity:<span class="params">(CGFloat)</span>velocity options:<span class="params">(UIViewAnimationOptions)</span>options animations:<span class="params">(void <span class="params">(^)</span><span class="params">(void)</span>)</span>animations completion:<span class="params">(void <span class="params">(^)</span><span class="params">(BOOL finished)</span>)</span>completion
+</code></pre><p>顾名思义，这个动画在执行时不是平滑的由起始状态到终了状态，而是在终了状态前后有个弹性变化，像弹簧一样。在这个API中，有两个参数值得关注：</p>
+<ul>
+<li>dampingRatio 这个参数代表弹簧的弹性系数，范围为0-1，0代表没有弹性，即这个方法没有效果，1代表弹性无穷，即无限震荡。    </li>
+<li>velocity 初始速度，0代表初始速度为0，1代表在一秒内执行完动画需要的速度，所以，假设需要在t秒内执行完, 则<code>velocity = 1 / t</code></li>
+</ul>
+<p>这个API的简单使用如下:</p>
+<pre><code>[UIView animateWithDuration:<span class="number">1.0f</span> delay:<span class="number">0.0f</span> usingSpringWithDamping:<span class="number">0.5</span> initialSpringVelocity:<span class="number">0.3</span> options:UIViewAnimationOptionRepeat animations:^{
+    self.view.frame = CGRectMake(<span class="number">0</span>, <span class="number">0</span>, <span class="number">200</span>, <span class="number">200</span>);
+} completion:^(BOOL finished) {
+    NSLog(@<span class="string">"Completion"</span>);
+}];
+</code></pre><h3 id="UIViewAnimationOptions">UIViewAnimationOptions</h3><p>在调用UIView动画的API时，可以传入这个参数配置动画的属性，一些常见的值有:</p>
+<ul>
+<li>UIViewAnimationOptionCurveEaseInOut(快进快出)</li>
+<li>UIViewAnimationOptionTransitionFlipFromLeft(从左边翻转)</li>
+</ul>
+<p>关于<code>UIViewAnimationOptions</code>的全部参数可以看<a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIView_Class/#//apple_ref/c/tdef/UIViewAnimationOptions" target="_blank" rel="external">这里</a></p>
+<h3 id="关键帧动画">关键帧动画</h3><p>调用的方法是:</p>
+<pre><code>+ <span class="params">(void)</span>animateKeyframesWithDuration:<span class="params">(NSTimeInterval)</span>duration delay:<span class="params">(NSTimeInterval)</span>delay options:<span class="params">(UIViewKeyframeAnimationOptions)</span>options animations:<span class="params">(void <span class="params">(^)</span><span class="params">(void)</span>)</span>animations completion:<span class="params">(void <span class="params">(^)</span><span class="params">(BOOL finished)</span>)</span>completion
+</code></pre><p>在方法内进行关键帧的添加，添加使用的是:</p>
+<pre><code>+ (<span class="typename">void</span>)<span class="string">addKeyframeWithRelativeStartTime:</span>(<span class="typename">double</span>)frameStartTime <span class="string">relativeDuration:</span>(<span class="typename">double</span>)frameDuration <span class="string">animations:</span>(<span class="typename">void</span> (^)(<span class="typename">void</span>))animations
+</code></pre><p>具体使用方法如下：</p>
+<pre><code>[UIView animateKeyframesWithDuration:1.0f delay:<span class="operator">0.<span class="number">0</span><span class="keyword">f</span> options:UIViewKeyframeAnimationOptionRepeat animations:^{
+    [UIView addKeyframeWithRelativeStartTime:<span class="number">0.0</span><span class="keyword">f</span> relativeDuration:<span class="number">0.2</span><span class="keyword">f</span> animations:^{
+        <span class="keyword">self</span>.<span class="keyword">view</span>.alpha = <span class="number">0.3</span><span class="keyword">f</span>;</span>
+    }];
+    [UIView addKeyframeWithRelativeStartTime:<span class="operator">0.<span class="number">0</span><span class="keyword">f</span> relativeDuration:<span class="number">0.4</span><span class="keyword">f</span> animations:^{
+        <span class="keyword">self</span>.<span class="keyword">view</span>.alpha = <span class="number">0.8</span><span class="keyword">f</span>;</span>
+    }];
+} completion:nil];
+</code></pre><a id="more"></a>]]></content>
+    <summary type="html">
+    <![CDATA[<p>Written By Lazy</p>
+<hr>
+<h2 id="前言">前言</h2><p>十一放假回来之后花了大概四五天的时间把Raywenderlich出的这本<a href="http://www.raywenderlich.com/store/ios-animations-by-tutorials">《iOS Animations by Tutorials》</a>读了一遍，感觉写的还是非常不错的，就借这个机会总结一下iOS里面涉及到animation最基本的内容。按照书中的顺序，依次总结如下：</p>
+<h2 id="View’s_Animation">View’s Animation</h2><h3 id="基本动画">基本动画</h3><p>基本动画是通过调用<code>+ (void)animateWithDuration:(NSTimeInterval)duration animations:(void (^)(void))animations</code>这个API实现的，这个方法可以处理view的frame、backgroundColor、alpha等各种view的property，使用起来极为方便，例如:</p>
+<pre><code>[UIView animateWithDuration:1.0f animations:^{
+    view.backgroundColor = [UIColor redColor]<span class="comment">;            </span>
+    view.alpha = 1.0f<span class="comment">;</span>
+}]<span class="comment">;</span>
+</code></pre><h3 id="弹簧动画">弹簧动画</h3><p>iOS 7之后新加的方法，API巨长无比：</p>
+<pre><code>+ <span class="params">(void)</span>animateWithDuration:<span class="params">(NSTimeInterval)</span>duration delay:<span class="params">(NSTimeInterval)</span>delay usingSpringWithDamping:<span class="params">(CGFloat)</span>dampingRatio initialSpringVelocity:<span class="params">(CGFloat)</span>velocity options:<span class="params">(UIViewAnimationOptions)</span>options animations:<span class="params">(void <span class="params">(^)</span><span class="params">(void)</span>)</span>animations completion:<span class="params">(void <span class="params">(^)</span><span class="params">(BOOL finished)</span>)</span>completion
+</code></pre><p>顾名思义，这个动画在执行时不是平滑的由起始状态到终了状态，而是在终了状态前后有个弹性变化，像弹簧一样。在这个API中，有两个参数值得关注：</p>
+<ul>
+<li>dampingRatio 这个参数代表弹簧的弹性系数，范围为0-1，0代表没有弹性，即这个方法没有效果，1代表弹性无穷，即无限震荡。    </li>
+<li>velocity 初始速度，0代表初始速度为0，1代表在一秒内执行完动画需要的速度，所以，假设需要在t秒内执行完, 则<code>velocity = 1 / t</code></li>
+</ul>
+<p>这个API的简单使用如下:</p>
+<pre><code>[UIView animateWithDuration:<span class="number">1.0f</span> delay:<span class="number">0.0f</span> usingSpringWithDamping:<span class="number">0.5</span> initialSpringVelocity:<span class="number">0.3</span> options:UIViewAnimationOptionRepeat animations:^{
+    self.view.frame = CGRectMake(<span class="number">0</span>, <span class="number">0</span>, <span class="number">200</span>, <span class="number">200</span>);
+} completion:^(BOOL finished) {
+    NSLog(@<span class="string">"Completion"</span>);
+}];
+</code></pre><h3 id="UIViewAnimationOptions">UIViewAnimationOptions</h3><p>在调用UIView动画的API时，可以传入这个参数配置动画的属性，一些常见的值有:</p>
+<ul>
+<li>UIViewAnimationOptionCurveEaseInOut(快进快出)</li>
+<li>UIViewAnimationOptionTransitionFlipFromLeft(从左边翻转)</li>
+</ul>
+<p>关于<code>UIViewAnimationOptions</code>的全部参数可以看<a href="https://developer.apple.com/library/ios/documentation/UIKit/Reference/UIView_Class/#//apple_ref/c/tdef/UIViewAnimationOptions">这里</a></p>
+<h3 id="关键帧动画">关键帧动画</h3><p>调用的方法是:</p>
+<pre><code>+ <span class="params">(void)</span>animateKeyframesWithDuration:<span class="params">(NSTimeInterval)</span>duration delay:<span class="params">(NSTimeInterval)</span>delay options:<span class="params">(UIViewKeyframeAnimationOptions)</span>options animations:<span class="params">(void <span class="params">(^)</span><span class="params">(void)</span>)</span>animations completion:<span class="params">(void <span class="params">(^)</span><span class="params">(BOOL finished)</span>)</span>completion
+</code></pre><p>在方法内进行关键帧的添加，添加使用的是:</p>
+<pre><code>+ (<span class="typename">void</span>)<span class="string">addKeyframeWithRelativeStartTime:</span>(<span class="typename">double</span>)frameStartTime <span class="string">relativeDuration:</span>(<span class="typename">double</span>)frameDuration <span class="string">animations:</span>(<span class="typename">void</span> (^)(<span class="typename">void</span>))animations
+</code></pre><p>具体使用方法如下：</p>
+<pre><code>[UIView animateKeyframesWithDuration:1.0f delay:<span class="operator">0.<span class="number">0</span><span class="keyword">f</span> options:UIViewKeyframeAnimationOptionRepeat animations:^{
+    [UIView addKeyframeWithRelativeStartTime:<span class="number">0.0</span><span class="keyword">f</span> relativeDuration:<span class="number">0.2</span><span class="keyword">f</span> animations:^{
+        <span class="keyword">self</span>.<span class="keyword">view</span>.alpha = <span class="number">0.3</span><span class="keyword">f</span>;</span>
+    }];
+    [UIView addKeyframeWithRelativeStartTime:<span class="operator">0.<span class="number">0</span><span class="keyword">f</span> relativeDuration:<span class="number">0.4</span><span class="keyword">f</span> animations:^{
+        <span class="keyword">self</span>.<span class="keyword">view</span>.alpha = <span class="number">0.8</span><span class="keyword">f</span>;</span>
+    }];
+} completion:nil];
+</code></pre>]]>
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[iOS知识细节]]></title>
+    <link href="http://lazyclutch.github.io/2015/08/25/iOS%E7%9F%A5%E8%AF%86%E7%BB%86%E8%8A%82/"/>
+    <id>http://lazyclutch.github.io/2015/08/25/iOS知识细节/</id>
+    <published>2015-08-25T06:08:21.000Z</published>
+    <updated>2015-08-27T13:17:52.000Z</updated>
+    <content type="html"><![CDATA[<p>Written by Lazy</p>
+<hr>
+<p>整理一些基础知识，有些过于简单了，但还是记录着，等其他人有需求时也可以顺手拈来。</p>
+<h3 id="Objective-C基础">Objective-C基础</h3><ol>
+<li>strong与weak的区别:<br><a href="http://pasanpremaratne.com/2013/12/04/ios-memory-management-p2/" target="_blank" rel="external">iOS Memory Management: Automatic Reference Counting</a></li>
+<li>@property各关键字详解:<br><a href="http://rypress.com/tutorials/objective-c/properties" target="_blank" rel="external">Properties</a><br><a href="http://stackoverflow.com/questions/8927727/objective-c-arc-strong-vs-retain-and-weak-vs-assign/15541801#15541801" target="_blank" rel="external">Objective-C ARC: strong vs retain and weak vs assign</a></li>
+<li>IBOutlet的property为什么设置为weak？<br><a href="https://developer.apple.com/library/ios/documentation/General/Conceptual/CocoaEncyclopedia/Outlets/Outlets.html#//apple_ref/doc/uid/TP40010810-CH10-SW1" target="_blank" rel="external">Outlets</a></li>
+<li><code>UIViewController</code>的view是strong还是weak？<br>strong，一般来说，顶部的view都应该设置为strong。</li>
+<li>Swift 1.2中property新加了哪些关键字,为什么要加这些关键字？<br><code>nonnull</code>, <code>nullable</code>和<code>null_resettable</code>,因为在Swift中有<code>?</code>和<code>!</code>关键字声明对象是否可以为nil，为了使OC的代码更容易被Swift理解，加了这么几个关键字。</li>
+<li>为什么block经常使用copy？<br><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/WorkingwithBlocks/WorkingwithBlocks.html#//apple_ref/doc/uid/TP40011210-CH8-SW12" target="_blank" rel="external">Objects Use Properties to Keep Track of Blocks</a></li>
+<li>如果不声明nonatomic，则默认为atomic。</li>
+<li>如何让自己的对象支持copy关键字？<br><a href="http://stackoverflow.com/questions/1459598/how-to-copy-an-object-in-objective-c" target="_blank" rel="external">How to copy an object in objective c</a></li>
+<li>如果对property不指定任何关键字，那么默认的关键字是什么?<ol>
+<li>基本数据类型: <code>atomic</code>, <code>assign</code>, <code>readwrite</code></li>
+<li>对象: <code>atomic</code>, <code>strong</code>, <code>readwrite</code></li>
+</ol>
+</li>
+<li>深复制与浅复制<br><a href="https://www.zybuluo.com/MicroCai/note/50592" target="_blank" rel="external">iOS 集合的深复制与浅复制</a></li>
+<li>关于synthesize<br><a href="http://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly/19821816#19821816" target="_blank" rel="external">When should I use @synthesize explicitly?</a></li>
+<li>Objective-C消息转发<br><a href="http://blog.csdn.net/c395565746c/article/details/8507008" target="_blank" rel="external">Objective-C 消息转发</a><br><a href="http://blog.paulopoiati.com/2009/12/05/forwarding-objective-c-messages/" target="_blank" rel="external">Forwarding Objective-C Messages</a><br><a href="http://blog.imaginea.com/message-forwarding-and-surrogate-objects-in-objective-c/" target="_blank" rel="external">Message Forwarding and Surrogate Objects in Objective-C</a></li>
+<li>Runtiem Associate的使用场景<br><a href="http://nshipster.com/associated-objects/" target="_blank" rel="external">Associated Objects</a><br><a href="http://blog.jobbole.com/79570/" target="_blank" rel="external">Objective-C Runtime 运行时之二：成员变量与属性</a></li>
+<li>Runloop<br><a href="http://blog.csdn.net/wzzvictory/article/details/9237973" target="_blank" rel="external">Objective-C之run loop详解</a><br><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html" target="_blank" rel="external">Run Loops</a><br><a href="http://chun.tips/blog/2014/10/20/zou-jin-run-loopde-shi-jie-%5B%3F%5D-:shi-yao-shi-run-loop%3F/" target="_blank" rel="external">走进Run Loop的世界 (一)：什么是Run Loop？</a><br><a href="http://chun.tips/blog/2014/10/20/zou-jin-run-loopde-shi-jie-er-:ru-he-pei-zhi-run-loop-sources/" target="_blank" rel="external">走进Run Loop的世界 (二)：如何配置Run Loop Sources</a><br><a href="http://blog.ibireme.com/2015/05/18/runloop/#base" target="_blank" rel="external">深入理解RunLoop</a></li>
+<li>KVO<br><a href="https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/KeyValueObserving/KeyValueObserving.html#//apple_ref/doc/uid/10000177-BCICJDHA" target="_blank" rel="external">Introduction to Key-Value Observing Programming Guide</a></li>
+</ol>
+<a id="more"></a>
+<h3 id="View">View</h3><ol>
+<li>initWithNibName, initWithCoder和awakeFromNib<br><a href="http://www.quora.com/Cocoa-API/What-is-the-difference-between-initWithCoder-initWithNibName-and-awakeFromNib" target="_blank" rel="external">Cocoa (API): What is the difference between initWithCoder:, initWithNibName:, and awakeFromNib?</a></li>
+</ol>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Written by Lazy</p>
+<hr>
+<p>整理一些基础知识，有些过于简单了，但还是记录着，等其他人有需求时也可以顺手拈来。</p>
+<h3 id="Objective-C基础">Objective-C基础</h3><ol>
+<li>strong与weak的区别:<br><a href="http://pasanpremaratne.com/2013/12/04/ios-memory-management-p2/">iOS Memory Management: Automatic Reference Counting</a></li>
+<li>@property各关键字详解:<br><a href="http://rypress.com/tutorials/objective-c/properties">Properties</a><br><a href="http://stackoverflow.com/questions/8927727/objective-c-arc-strong-vs-retain-and-weak-vs-assign/15541801#15541801">Objective-C ARC: strong vs retain and weak vs assign</a></li>
+<li>IBOutlet的property为什么设置为weak？<br><a href="https://developer.apple.com/library/ios/documentation/General/Conceptual/CocoaEncyclopedia/Outlets/Outlets.html#//apple_ref/doc/uid/TP40010810-CH10-SW1">Outlets</a></li>
+<li><code>UIViewController</code>的view是strong还是weak？<br>strong，一般来说，顶部的view都应该设置为strong。</li>
+<li>Swift 1.2中property新加了哪些关键字,为什么要加这些关键字？<br><code>nonnull</code>, <code>nullable</code>和<code>null_resettable</code>,因为在Swift中有<code>?</code>和<code>!</code>关键字声明对象是否可以为nil，为了使OC的代码更容易被Swift理解，加了这么几个关键字。</li>
+<li>为什么block经常使用copy？<br><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/WorkingwithBlocks/WorkingwithBlocks.html#//apple_ref/doc/uid/TP40011210-CH8-SW12">Objects Use Properties to Keep Track of Blocks</a></li>
+<li>如果不声明nonatomic，则默认为atomic。</li>
+<li>如何让自己的对象支持copy关键字？<br><a href="http://stackoverflow.com/questions/1459598/how-to-copy-an-object-in-objective-c">How to copy an object in objective c</a></li>
+<li>如果对property不指定任何关键字，那么默认的关键字是什么?<ol>
+<li>基本数据类型: <code>atomic</code>, <code>assign</code>, <code>readwrite</code></li>
+<li>对象: <code>atomic</code>, <code>strong</code>, <code>readwrite</code></li>
+</ol>
+</li>
+<li>深复制与浅复制<br><a href="https://www.zybuluo.com/MicroCai/note/50592">iOS 集合的深复制与浅复制</a></li>
+<li>关于synthesize<br><a href="http://stackoverflow.com/questions/19784454/when-should-i-use-synthesize-explicitly/19821816#19821816">When should I use @synthesize explicitly?</a></li>
+<li>Objective-C消息转发<br><a href="http://blog.csdn.net/c395565746c/article/details/8507008">Objective-C 消息转发</a><br><a href="http://blog.paulopoiati.com/2009/12/05/forwarding-objective-c-messages/">Forwarding Objective-C Messages</a><br><a href="http://blog.imaginea.com/message-forwarding-and-surrogate-objects-in-objective-c/">Message Forwarding and Surrogate Objects in Objective-C</a></li>
+<li>Runtiem Associate的使用场景<br><a href="http://nshipster.com/associated-objects/">Associated Objects</a><br><a href="http://blog.jobbole.com/79570/">Objective-C Runtime 运行时之二：成员变量与属性</a></li>
+<li>Runloop<br><a href="http://blog.csdn.net/wzzvictory/article/details/9237973">Objective-C之run loop详解</a><br><a href="https://developer.apple.com/library/ios/documentation/Cocoa/Conceptual/Multithreading/RunLoopManagement/RunLoopManagement.html">Run Loops</a><br><a href="http://chun.tips/blog/2014/10/20/zou-jin-run-loopde-shi-jie-%5B%3F%5D-:shi-yao-shi-run-loop%3F/">走进Run Loop的世界 (一)：什么是Run Loop？</a><br><a href="http://chun.tips/blog/2014/10/20/zou-jin-run-loopde-shi-jie-er-:ru-he-pei-zhi-run-loop-sources/">走进Run Loop的世界 (二)：如何配置Run Loop Sources</a><br><a href="http://blog.ibireme.com/2015/05/18/runloop/#base">深入理解RunLoop</a></li>
+<li>KVO<br><a href="https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/KeyValueObserving/KeyValueObserving.html#//apple_ref/doc/uid/10000177-BCICJDHA">Introduction to Key-Value Observing Programming Guide</a></li>
+</ol>]]>
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[iOS中使用MPMoviePlayerController播放m3u8直播源以及播放器的简单定制]]></title>
+    <link href="http://lazyclutch.github.io/2015/08/24/iOS%E4%B8%AD%E4%BD%BF%E7%94%A8MPMoviePlayerController%E6%92%AD%E6%94%BEm3u8%E7%9B%B4%E6%92%AD%E6%BA%90%E4%BB%A5%E5%8F%8A%E6%92%AD%E6%94%BE%E5%99%A8%E7%9A%84%E7%AE%80%E5%8D%95%E5%AE%9A%E5%88%B6/"/>
+    <id>http://lazyclutch.github.io/2015/08/24/iOS中使用MPMoviePlayerController播放m3u8直播源以及播放器的简单定制/</id>
+    <published>2015-08-24T06:33:25.000Z</published>
+    <updated>2015-08-24T08:11:12.000Z</updated>
+    <content type="html"><![CDATA[<p>Written by Lazy</p>
+<hr>
+<h3 id="介绍">介绍</h3><p>m3u8文件是一种使用UTF-8编码格式的m3u文件。这种文件记录了一个索引纯文本，打开它时播放软件并不是直接播放，而是根据索引找到对应的音视频文件的网络地址进行在线播放。最近找到了一些英超的直播源，格式为m3u8，为了方便，打算自己写一个小的App播放这些直播源。</p>
+<h3 id="MPMoviePlayerController的简单使用">MPMoviePlayerController的简单使用</h3><p>在iOS中可以利用<code>MPMoviePlayerController</code>来播放视频，支持录像方式的播放和直播方式的播放（又称实时广播）,使用<code>MPMoviePlayerController</code>非常容易，只需要在自己的view controller里面添加，并指定直播源的地址即可，示例如下:</p>
+<pre><code>_mpController = [[<span class="built_in">MPMoviePlayerController</span> alloc] init];
+_mpController<span class="variable">.view</span><span class="variable">.frame</span> = <span class="keyword">self</span><span class="variable">.view</span><span class="variable">.frame</span>; <span class="comment">// 设定尺寸为屏幕尺寸</span>
+_mpController<span class="variable">.scalingMode</span> = <span class="built_in">MPMovieScalingModeAspectFit</span>; <span class="comment">//固定缩放比例并且尽量全部</span>
+_mpController<span class="variable">.shouldAutoplay</span> = <span class="literal">YES</span>; <span class="comment">// 自动开始播放</span>
+_mpController<span class="variable">.allowsAirPlay</span> = <span class="literal">YES</span>; <span class="comment">//允许投影到AirPlay</span>
+</code></pre><p>新建完<code>MPMoviePlayerController</code>对象后，设定地址，然后就可以开始播放了。</p>
+<pre><code><span class="keyword">self</span><span class="variable">.mpController</span><span class="variable">.contentURL</span> = [<span class="built_in">NSURL</span> URLWithString:<span class="string">@"m3u8地址"</span>];
+[<span class="keyword">self</span><span class="variable">.mpController</span> play];
+</code></pre><p>如果是竖屏，可以在<code>viewDidLoad</code>中切至横屏:</p>
+<pre><code><span class="built_in">NSNumber</span> *value = [<span class="built_in">NSNumber</span> numberWithInt:<span class="built_in">UIInterfaceOrientationLandscapeRight</span>];
+[[<span class="built_in">UIDevice</span> currentDevice] setValue:value forKey:<span class="string">@"orientation"</span>];
+</code></pre><a id="more"></a>
+<h3 id="为播放器添加滑动改变音量的功能">为播放器添加滑动改变音量的功能</h3><p>目前主流的播放器和视频软件都支持上下滑动来改变音量，实现思路很简单，就是检测滑动的距离，然后转换成一个合适的系数，即为要改变的音量。然而在操作的过程中遇到了一些问题。</p>
+<ol>
+<li>系统音量和播放器音量是两个不同的东西，如果系统音量太小的话，改变播放器的音量没有什么太大的效果，所以只能改变系统音量。</li>
+<li>iOS中采用<code>MPVolumeView</code>改变系统音量，这是一个可视的view，但是我并不想在自己的播放区中展示它。</li>
+<li>改变音量时会展示下面的提示框，但有时候开发者希望自己定制改变音量的提示。</li>
+</ol>
+<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/20150824IMG_0363.PNG" alt="音量" title="音量"></p>
+<ul>
+<li><p>检测滑动</p>
+<ul>
+<li>在<code>MPMoviePlayerController</code>中添加一个pan手势，用来检测滑动状态，代码就不贴了。</li>
+<li>添加一个<code>CGFloat pendingVolume</code>记录滑动开始时的音量, 两个<code>CGPoint startLocation</code>和<code>endLocation</code>记录手势的起始位置。</li>
+<li><p>在pan的handler事件中添加以下代码:</p>
+<pre><code><span class="keyword">if</span> (pan<span class="variable">.state</span> == <span class="built_in">UIGestureRecognizerStateBegan</span>) {
+    <span class="keyword">self</span><span class="variable">.pendingVolume</span> = [[<span class="built_in">AVAudioSession</span> sharedInstance] outputVolume]; <span class="comment">//获取当前音量</span>
+    <span class="keyword">self</span><span class="variable">.startLocation</span> = [pan locationInView:<span class="keyword">self</span><span class="variable">.mpController</span><span class="variable">.view</span>];
+} <span class="keyword">else</span> <span class="keyword">if</span> (pan<span class="variable">.state</span> == <span class="built_in">UIGestureRecognizerStateChanged</span>){
+    <span class="keyword">self</span><span class="variable">.endLocation</span> = [pan locationInView:<span class="keyword">self</span><span class="variable">.mpController</span><span class="variable">.view</span>];
+    <span class="built_in">CGFloat</span> distance = <span class="keyword">self</span><span class="variable">.startLocation</span><span class="variable">.y</span> - <span class="keyword">self</span><span class="variable">.endLocation</span><span class="variable">.y</span>;
+    <span class="built_in">CGFloat</span> volumeChange = distance / kVolumeChangeRatio;  <span class="comment">//kVolumeChangeRatio = 300, 这三句是算出一个合理的系数</span>
+    <span class="built_in">CGFloat</span> newVol = <span class="keyword">self</span><span class="variable">.pendingVolume</span> + volumeChange;
+    [<span class="keyword">self</span> changeVolume:newVol]; <span class="comment">// 下文会介绍改变音量的方法</span>
+} <span class="keyword">else</span> <span class="keyword">if</span> (pan<span class="variable">.state</span> == <span class="built_in">UIGestureRecognizerStateEnded</span>){
+    <span class="keyword">self</span><span class="variable">.startLocation</span> = <span class="built_in">CGPointMake</span>(<span class="number">0</span>, <span class="number">0</span>);
+    <span class="keyword">self</span><span class="variable">.endLocation</span> = <span class="built_in">CGPointMake</span>(<span class="number">0</span>, <span class="number">0</span>);
+}
+</code></pre></li>
+</ul>
+</li>
+<li><p>改变音量</p>
+<ul>
+<li>在<code>MPMoviePlayerController</code>中添加<code>@property (nonatomic, strong) MPVolumeView *volumeView;</code></li>
+<li><code>MPVolumeView</code>有一个子view<code>MPVolumeSlider</code>,通过对其set value可以改变系统音量。</li>
+<li>获取<code>MPVolumeSlider</code>可以用遍历<code>MPVolumeView</code>子view的方法。</li>
+<li><p>改变音量的代码如下:</p>
+<pre><code>- (<span class="keyword">void</span>)changeVolume:(<span class="built_in">CGFloat</span>)volume{
+    <span class="built_in">UISlider</span>* volumeViewSlider = <span class="literal">nil</span>;
+    <span class="keyword">for</span> (<span class="built_in">UIView</span> *view <span class="keyword">in</span> [<span class="keyword">self</span><span class="variable">.volumeView</span> subviews]){
+        <span class="keyword">if</span> ([view<span class="variable">.class</span><span class="variable">.description</span> isEqualToString:<span class="string">@"MPVolumeSlider"</span>]){
+            volumeViewSlider = (<span class="built_in">UISlider</span>*)view;
+            <span class="keyword">break</span>;
+        }
+    }
+
+    [volumeViewSlider setValue:volume animated:<span class="literal">NO</span>];
+    [volumeViewSlider sendActionsForControlEvents:<span class="built_in">UIControlEventTouchUpInside</span>];
+}
+</code></pre></li>
+<li><p>如果不想看见系统音量的提示框，可以在init时将frame设在屏幕以外，但是要确保hidden为NO。</p>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="参考资料">参考资料</h3><p><a href="https://developer.apple.com/library/ios/documentation/MediaPlayer/Reference/MPMoviePlayerController_Class/" target="_blank" rel="external">MPMoviePlayerController Class Reference</a><br><a href="http://segmentfault.com/a/1190000002401961" target="_blank" rel="external">iOS编程修改系统音量</a></p>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Written by Lazy</p>
+<hr>
+<h3 id="介绍">介绍</h3><p>m3u8文件是一种使用UTF-8编码格式的m3u文件。这种文件记录了一个索引纯文本，打开它时播放软件并不是直接播放，而是根据索引找到对应的音视频文件的网络地址进行在线播放。最近找到了一些英超的直播源，格式为m3u8，为了方便，打算自己写一个小的App播放这些直播源。</p>
+<h3 id="MPMoviePlayerController的简单使用">MPMoviePlayerController的简单使用</h3><p>在iOS中可以利用<code>MPMoviePlayerController</code>来播放视频，支持录像方式的播放和直播方式的播放（又称实时广播）,使用<code>MPMoviePlayerController</code>非常容易，只需要在自己的view controller里面添加，并指定直播源的地址即可，示例如下:</p>
+<pre><code>_mpController = [[<span class="built_in">MPMoviePlayerController</span> alloc] init];
+_mpController<span class="variable">.view</span><span class="variable">.frame</span> = <span class="keyword">self</span><span class="variable">.view</span><span class="variable">.frame</span>; <span class="comment">// 设定尺寸为屏幕尺寸</span>
+_mpController<span class="variable">.scalingMode</span> = <span class="built_in">MPMovieScalingModeAspectFit</span>; <span class="comment">//固定缩放比例并且尽量全部</span>
+_mpController<span class="variable">.shouldAutoplay</span> = <span class="literal">YES</span>; <span class="comment">// 自动开始播放</span>
+_mpController<span class="variable">.allowsAirPlay</span> = <span class="literal">YES</span>; <span class="comment">//允许投影到AirPlay</span>
+</code></pre><p>新建完<code>MPMoviePlayerController</code>对象后，设定地址，然后就可以开始播放了。</p>
+<pre><code><span class="keyword">self</span><span class="variable">.mpController</span><span class="variable">.contentURL</span> = [<span class="built_in">NSURL</span> URLWithString:<span class="string">@"m3u8地址"</span>];
+[<span class="keyword">self</span><span class="variable">.mpController</span> play];
+</code></pre><p>如果是竖屏，可以在<code>viewDidLoad</code>中切至横屏:</p>
+<pre><code><span class="built_in">NSNumber</span> *value = [<span class="built_in">NSNumber</span> numberWithInt:<span class="built_in">UIInterfaceOrientationLandscapeRight</span>];
+[[<span class="built_in">UIDevice</span> currentDevice] setValue:value forKey:<span class="string">@"orientation"</span>];
+</code></pre>]]>
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[关于UICollectionViewCell异步加载图片的优化]]></title>
+    <link href="http://lazyclutch.github.io/2015/08/19/%E5%85%B3%E4%BA%8EUICollectionViewCell%E5%BC%82%E6%AD%A5%E5%8A%A0%E8%BD%BD%E5%9B%BE%E7%89%87%E7%9A%84%E4%BC%98%E5%8C%96/"/>
+    <id>http://lazyclutch.github.io/2015/08/19/关于UICollectionViewCell异步加载图片的优化/</id>
+    <published>2015-08-19T05:47:06.000Z</published>
+    <updated>2015-08-19T08:04:00.000Z</updated>
+    <content type="html"><![CDATA[<p>Written by Lazy</p>
+<hr>
+<p>最近写项目时遇到一个关于UICollectionViewCell加载异步图片的问题，记录如下。</p>
+<h2 id="背景">背景</h2><p>该ViewController是由UICollectionView承载的，所做的工作是根据url加载图片填充每个cell。</p>
+<h2 id="基本思路">基本思路</h2><p>由于url是通过block返回的一个数组，而且CollectionView设置了分页，所以每次block返回后会重新reload这个CollectionView，大致的代码如下：</p>
+<p><strong>ViewController.m</strong></p>
+<pre><code>- (<span class="keyword">void</span>)loadPicture{
+    [<span class="keyword">self</span><span class="variable">.imageFetcher</span> loadPictureWithCompletionHandler:^(<span class="built_in">NSArray</span> *pics, <span class="built_in">NSError</span> *error){
+        <span class="keyword">if</span>(!error){
+            [<span class="keyword">self</span><span class="variable">.pictures</span> addObjectsFromArray:pics];
+            [<span class="keyword">self</span><span class="variable">.collectionView</span> reloadData];
+        }
+    }];
+}
+</code></pre><p><strong>CollectionViewDataSource.m</strong></p>
+<pre><code>- (UICollectionViewCell *)<span class="string">collectionView:</span>(UICollectionView *)collectionView <span class="string">cellForItemAtIndexPath:</span>(NSIndexPath *)indexPath{
+<span class="string">cellForItemAtIndexPath:</span>(NSIndexPath *)indexPath{
+    LIHomeImageCell *cell = [collectionView <span class="string">dequeueReusableCellWithReuseIdentifier:</span>@<span class="string">"CollectionIdentifier"</span> <span class="string">forIndexPath:</span>indexPath];
+    <span class="keyword">if</span> (cell == nil) {
+        cell = [[LIHomeImageCell alloc] init];
+    }
+    cell.backgroundColor = [UIColor lightGrayColor];
+    LIImage *li = [[LIImage alloc] <span class="string">initWithConfig:</span>[self.pictures <span class="string">objectAtIndex:</span>[indexPath row]]];
+    [cell <span class="string">configueCellWithImage:</span>li <span class="string">atIndexpath:</span>indexPath];
+    <span class="keyword">return</span> cell;
+}
+</code></pre><p><strong>CollectionViewCell.m</strong></p>
+<pre><code>- (<span class="keyword">void</span>)configueCellWithImage:(LIImage *)image atIndexpath:(<span class="built_in">NSIndexPath</span>*)indexPath{
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    __<span class="keyword">weak</span> __<span class="keyword">typeof</span>(<span class="keyword">self</span>) weakSelf = <span class="keyword">self</span>;
+    [manager downloadImageWithURL:[<span class="built_in">NSURL</span> URLWithString:image<span class="variable">.smallImageUrl</span>] options:<span class="number">0</span> progress:<span class="literal">nil</span> completed:^(<span class="built_in">UIImage</span> *image, <span class="built_in">NSError</span> *error, SDImageCacheType cacheType, <span class="built_in">BOOL</span> finished, <span class="built_in">NSURL</span> *imageURL) {
+        __<span class="keyword">strong</span> __<span class="keyword">typeof</span>(weakSelf) strongSelf = weakSelf;
+        strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = image;
+    }];
+}
+</code></pre><a id="more"></a>
+<p>代码写好之后运行，发现两个问题：</p>
+<ol>
+<li>有些cell在加载的时候会<em>闪到别的图片</em>，然后<em>跳回正确的图片</em>，这种cell在已加载过的cell里面和新添加的cell里都会出现。滑动屏幕时也会出现。</li>
+<li>有些cell在读取时会最终<em>显示同一张图片</em>，显然有一个cell的行为是错误的，当这些cell <em>划出屏幕再划进时</em>，两个cell的图片显示正确了。</li>
+</ol>
+<h2 id="研究问题">研究问题</h2><p>查阅了StackOverflow以及一些博客后，认为这两个问题可能由以下情况导致：</p>
+<ul>
+<li>cell在滑动时会准备复用，调用的是<code>- (void)prepareForReuse</code>方法，如果没有正确设置这个方法，那么滑动复用的时候会先显示原来的图片，再加载新的图片。</li>
+<li>在项目中加载图片的方式是后台线程加载，这样会涉及资源的竞争，特别是在屏幕滑动的时候，如果前面的cell没有加载完成，就要准备复用到别的cell，这时候当前面的cell中的图片加载完成时，这个cell会认为OK了，不会再加载新的cell了。</li>
+<li>之前提到在项目中分页加载时会reload所有的cell，这并不是一种非常好的方式，可用<code>- (void)insertItemsAtIndexPaths:(NSArray&lt;NSIndexPath *&gt; *)indexPaths</code>代替之。</li>
+</ul>
+<h2 id="解决方案">解决方案</h2><ul>
+<li><p>在<code>ViewController.m</code>的<code>- (void)loadPicture</code>中添加以下代码：</p>
+<pre><code><span class="tag">if</span> ([strongSelf.pictures count] == [strongSelf.picsToShow count]) { 
+    <span class="attr_selector">[strongSelf.picView reloadData]</span>;
+} <span class="tag">else</span> {
+    <span class="attr_selector">[strongSelf.picView insertItemsAtIndexPaths:indexPaths]</span>;
+}    
+</code></pre></li>
+</ul>
+<p>判断条件为第一次加载时，reload所有数据；否则仅仅插入新获得的数据。</p>
+<ul>
+<li><p>在<code>cellForItemAtIndexPath</code> 这个方法中添加下面的代码(加到cell创建后):</p>
+<pre><code>cell.tag = indexPath.row<span class="comment">;</span>
+cell.homeImage.image = nil<span class="comment">;</span>
+</code></pre></li>
+<li><p>在<code>CollectionViewCell.m</code>中,加入<code>- (void)prepareForReuse</code>方法：</p>
+<pre><code>- (<span class="keyword">void</span>)prepareForReuse{
+    [<span class="keyword">super</span> prepareForReuse];
+    [<span class="keyword">self</span><span class="variable">.homeImage</span> sd_cancelCurrentImageLoad];
+    <span class="keyword">self</span><span class="variable">.homeImage</span><span class="variable">.image</span> = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@"placeholder.png"</span>];
+}
+</code></pre></li>
+<li><p>重写<code>- (void)configueCellWithImage:(LIImage *)image atIndexpath:(NSIndexPath*)indexPath</code>方法:</p>
+<pre><code>- (<span class="keyword">void</span>)configueCellWithImage:(LIImage *)image atIndexpath:(<span class="built_in">NSIndexPath</span>*)indexPath{
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    __<span class="keyword">weak</span> __<span class="keyword">typeof</span>(<span class="keyword">self</span>) weakSelf = <span class="keyword">self</span>;
+    [manager downloadImageWithURL:[<span class="built_in">NSURL</span> URLWithString:image<span class="variable">.smallImageUrl</span>] options:<span class="number">0</span> progress:<span class="literal">nil</span> completed:^(<span class="built_in">UIImage</span> *image, <span class="built_in">NSError</span> *error, SDImageCacheType cacheType, <span class="built_in">BOOL</span> finished, <span class="built_in">NSURL</span> *imageURL) {
+        __<span class="keyword">strong</span> __<span class="keyword">typeof</span>(weakSelf) strongSelf = weakSelf;
+        <span class="keyword">if</span> (strongSelf<span class="variable">.tag</span> == indexPath<span class="variable">.row</span>) {
+            strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = image;
+        } <span class="keyword">else</span> {
+            strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = [<span class="built_in">UIImage</span> imageNamed:<span class="string">@"placeholder.png"</span>];
+        }
+    }];
+}
+</code></pre></li>
+</ul>
+<p>逻辑中的判断是预防cell显示错误的图片。实际上，当采用insert方法插入新cell后，目前尚未发现cell会显示错误。</p>
+<h2 id="总结">总结</h2><p>采用了以上方法后，问题得到了解决。SDWebImage确实是一个很好用的库，既解决了滑动时卡顿的问题，又做了图片缓存，可以使开发者重点关注业务方面。但同时这种后台加载配合UICollectionView或UITableView使用时的问题也要注意。</p>
+<h2 id="参考资料">参考资料</h2><ul>
+<li><a href="http://stackoverflow.com/questions/18756580/uicollectionview-sdwebimage-cell-reuse" target="_blank" rel="external">UICollectionView + SDWebImage + Cell reuse</a></li>
+<li><a href="http://iswwwup.com/t/fbc42bab1dff/ios-sdwebimage-with-reusable-cell-issue.html" target="_blank" rel="external">SDWebImage with reusable cell issue</a></li>
+<li><a href="http://stackoverflow.com/questions/15668160/asynchronous-downloading-of-images-for-uitableview-with-gcd" target="_blank" rel="external">Asynchronous downloading of images for UITableView with GCD</a></li>
+<li><a href="http://stackoverflow.com/questions/12611292/uicollectionview-assertion-failure" target="_blank" rel="external">UICollectionView Assertion failure</a></li>
+</ul>
+]]></content>
+    <summary type="html">
+    <![CDATA[<p>Written by Lazy</p>
+<hr>
+<p>最近写项目时遇到一个关于UICollectionViewCell加载异步图片的问题，记录如下。</p>
+<h2 id="背景">背景</h2><p>该ViewController是由UICollectionView承载的，所做的工作是根据url加载图片填充每个cell。</p>
+<h2 id="基本思路">基本思路</h2><p>由于url是通过block返回的一个数组，而且CollectionView设置了分页，所以每次block返回后会重新reload这个CollectionView，大致的代码如下：</p>
+<p><strong>ViewController.m</strong></p>
+<pre><code>- (<span class="keyword">void</span>)loadPicture{
+    [<span class="keyword">self</span><span class="variable">.imageFetcher</span> loadPictureWithCompletionHandler:^(<span class="built_in">NSArray</span> *pics, <span class="built_in">NSError</span> *error){
+        <span class="keyword">if</span>(!error){
+            [<span class="keyword">self</span><span class="variable">.pictures</span> addObjectsFromArray:pics];
+            [<span class="keyword">self</span><span class="variable">.collectionView</span> reloadData];
+        }
+    }];
+}
+</code></pre><p><strong>CollectionViewDataSource.m</strong></p>
+<pre><code>- (UICollectionViewCell *)<span class="string">collectionView:</span>(UICollectionView *)collectionView <span class="string">cellForItemAtIndexPath:</span>(NSIndexPath *)indexPath{
+<span class="string">cellForItemAtIndexPath:</span>(NSIndexPath *)indexPath{
+    LIHomeImageCell *cell = [collectionView <span class="string">dequeueReusableCellWithReuseIdentifier:</span>@<span class="string">"CollectionIdentifier"</span> <span class="string">forIndexPath:</span>indexPath];
+    <span class="keyword">if</span> (cell == nil) {
+        cell = [[LIHomeImageCell alloc] init];
+    }
+    cell.backgroundColor = [UIColor lightGrayColor];
+    LIImage *li = [[LIImage alloc] <span class="string">initWithConfig:</span>[self.pictures <span class="string">objectAtIndex:</span>[indexPath row]]];
+    [cell <span class="string">configueCellWithImage:</span>li <span class="string">atIndexpath:</span>indexPath];
+    <span class="keyword">return</span> cell;
+}
+</code></pre><p><strong>CollectionViewCell.m</strong></p>
+<pre><code>- (<span class="keyword">void</span>)configueCellWithImage:(LIImage *)image atIndexpath:(<span class="built_in">NSIndexPath</span>*)indexPath{
+    SDWebImageManager *manager = [SDWebImageManager sharedManager];
+    __<span class="keyword">weak</span> __<span class="keyword">typeof</span>(<span class="keyword">self</span>) weakSelf = <span class="keyword">self</span>;
+    [manager downloadImageWithURL:[<span class="built_in">NSURL</span> URLWithString:image<span class="variable">.smallImageUrl</span>] options:<span class="number">0</span> progress:<span class="literal">nil</span> completed:^(<span class="built_in">UIImage</span> *image, <span class="built_in">NSError</span> *error, SDImageCacheType cacheType, <span class="built_in">BOOL</span> finished, <span class="built_in">NSURL</span> *imageURL) {
+        __<span class="keyword">strong</span> __<span class="keyword">typeof</span>(weakSelf) strongSelf = weakSelf;
+        strongSelf<span class="variable">.homeImage</span><span class="variable">.image</span> = image;
+    }];
+}
+</code></pre>]]>
+    
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+  <entry>
+    <title><![CDATA[关于NSData末尾为Null-terminated的处理]]></title>
+    <link href="http://lazyclutch.github.io/2015/07/23/%E5%85%B3%E4%BA%8ENSData%E6%9C%AB%E5%B0%BE%E4%B8%BANull-terminated%E7%9A%84%E5%A4%84%E7%90%86/"/>
+    <id>http://lazyclutch.github.io/2015/07/23/关于NSData末尾为Null-terminated的处理/</id>
+    <published>2015-07-23T08:26:27.000Z</published>
+    <updated>2015-08-19T08:28:59.000Z</updated>
+    <content type="html"><![CDATA[<p>用下面的代码转化一下就好了:</p>
+<pre><code><span class="keyword">if</span>(lastByte==<span class="number">0x0</span>){
+    <span class="comment">//string is null-terminated</span>
+    str=[<span class="built_in">NSStringstringWithUTF8String</span>:[<span class="keyword">self</span> bytes]];
+}
+<span class="keyword">else</span>{
+    <span class="comment">//string is not null-terminated</span>
+    str=[[<span class="built_in">NSStringalloc</span>]initWithData:<span class="keyword">self</span> encoding:<span class="built_in">NSUTF8StringEncoding</span>];
+}
+</code></pre>]]></content>
+    <summary type="html">
+    <![CDATA[<p>用下面的代码转化一下就好了:</p>
+<pre><code><span class="keyword">if</span>(lastByte==<span class="number">0x0</span>){
+    <span class="comment">//str]]>
+    </summary>
+    
+      <category term="iOS" scheme="http://lazyclutch.github.io/tags/iOS/"/>
+    
+      <category term="Tech" scheme="http://lazyclutch.github.io/categories/Tech/"/>
+    
+  </entry>
+  
+</feed>
