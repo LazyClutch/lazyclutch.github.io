@@ -40,9 +40,7 @@
 <meta name="description" content="Written by Lazy
 
 上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。
-查找问题之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开某页面,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。
-
-于是打开C">
+查找问题之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开某页面,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="自定义HTTP请求的Cookie">
 <meta property="og:url" content="http://lazyclutch.github.io/2015/11/11/自定义HTTP请求的Cookie/index.html">
@@ -50,20 +48,16 @@
 <meta property="og:description" content="Written by Lazy
 
 上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。
-查找问题之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开某页面,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。
-
-于是打开C">
+查找问题之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开某页面,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。">
 <meta property="og:image" content="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_mms.png">
 <meta property="og:image" content="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_wechat.png">
-<meta property="og:updated_time" content="2015-11-11T08:17:59.000Z">
+<meta property="og:updated_time" content="2015-11-24T06:44:16.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="自定义HTTP请求的Cookie">
 <meta name="twitter:description" content="Written by Lazy
 
 上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。
-查找问题之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开某页面,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。
-
-于是打开C">
+查找问题之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开某页面,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。">
 
 
 <script type="text/javascript" id="hexo.configuration">
@@ -263,6 +257,7 @@
 <p>上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。</p>
 <h3 id="查找问题">查找问题</h3><p>之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开<a href="http://shanghaicity.openservice.kankanews.com/public/bus/mes/sid/0db6ca4f4b3b83c70a59ef3cdbe003b6" target="_blank" rel="external">某页面</a>,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。</p>
 <p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_mms.png" alt="wechat" title="wechat"></p>
+<a id="more"></a>
 <p>于是打开<a href="http://www.charlesproxy.com/" target="_blank" rel="external">Charles</a>，使用微信进入公众号，看一下用正确的步骤访问发出的API有什么奥秘：</p>
 <p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_wechat.png" alt="weixin" title="weixin"></p>
 <p>最值得怀疑的地方当然是<code>User-Agent</code>，因为一般判断是否为微信访问都是用这个字段判断的，稍微值得怀疑的地方有<code>Cookie</code>和<code>Referer</code>。于是打开<a href="https://chrome.google.com/webstore/detail/dhc-resthttp-api-client/aejoelaoggembcahagimdiliamlcdmfm?hl=en" target="_blank" rel="external">DHC</a>，采用控制变量法试图重现这个访问。结果是：</p>

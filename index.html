@@ -347,44 +347,16 @@ print<span class="list">(<span class="keyword">Int</span>.abs<span class="list">
 
       
         
-          <span itemprop="articleBody"><p>Written by Lazy</p>
+          <p>Written by Lazy</p>
 <hr>
 <p>上半年的时候写过一个上海公交的实时到站查询的小应用，是利用“上海发布”这个公众号提供的接口抓数据，这几天发现不能用了，查了一下与iOS 9的ATS无关，猜测可能是公众号那边进行了安全升级，于是开始尝试如何绕过升级。</p>
-<h3 id="查找问题">查找问题</h3><p>之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开<a href="http://shanghaicity.openservice.kankanews.com/public/bus/mes/sid/0db6ca4f4b3b83c70a59ef3cdbe003b6" target="_blank" rel="external">某页面</a>,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。</p>
-<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_mms.png" alt="wechat" title="wechat"></p>
-<p>于是打开<a href="http://www.charlesproxy.com/" target="_blank" rel="external">Charles</a>，使用微信进入公众号，看一下用正确的步骤访问发出的API有什么奥秘：</p>
-<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_wechat.png" alt="weixin" title="weixin"></p>
-<p>最值得怀疑的地方当然是<code>User-Agent</code>，因为一般判断是否为微信访问都是用这个字段判断的，稍微值得怀疑的地方有<code>Cookie</code>和<code>Referer</code>。于是打开<a href="https://chrome.google.com/webstore/detail/dhc-resthttp-api-client/aejoelaoggembcahagimdiliamlcdmfm?hl=en" target="_blank" rel="external">DHC</a>，采用控制变量法试图重现这个访问。结果是：</p>
-<ul>
-<li>仅复制<code>User-Agent</code>后，不可访问</li>
-<li>仅复制<code>Cookie</code>后，可以访问</li>
-<li>仅复制<code>Referer</code>后，不可访问</li>
-</ul>
-<p>那么关键点就是Cookie了，该Cookie是长长的一串：</p>
-<pre><code>Hm_lpvt_6f69830ae7173059e935b61372431b35=<span class="number">1447228192</span>; Hm_lvt_6f69830ae7173059e935b61372431b35=<span class="number">1447038184</span>,<span class="number">1447137058</span>,<span class="number">1447215960</span>,<span class="number">1447216445</span>; ansoecdxc=oY1pTw1R0Nhy7b_Z2A78eRuc8_j8; HA=<span class="number">00f</span>5d65f902d3087437b72fcff198dc65804d0f6; HB=MDBmNWQ2NWY5MDJkMzA4NzQzN2I3MmZjZmYxOThkYzY1ODA0ZDBmNg==; HC=<span class="number">9</span>d0e47e289930755027528ba66fe8445ac00ac59; HD=MjAxNTExMTE=; HG=<span class="number">1466112</span>a248d3106f14675fc55fddd3155d19d64; HH=<span class="number">5144</span>d4292cdb6379a557a5b07b7780e201c7e1fa; HK=<span class="number">19</span>c1ef297a9e75c4dd74c88d89210f4d7af5c7f8; HO=TWpBeE5URXhNVEU9MTVNakl5TmpZPTQ5VFc5NmFXeHNZUzgxTGpBZ0tHbFFhRzl1WlRzZ1ExQlZJR2xRYUc5dVpTQlBVeUE1WHpFZ2JHbHJaU0JOWVdNZ1QxTWdXQ2tnUVhCd2JHVlhaV0pMYVhRdk5qQXhMakV1TkRZZ0tFdElWRTFNTENCc2FXdGxJRWRsWTJ0dktTQk5iMkpwYkdVdk1UTkNNVFF6SUUxcFkzSnZUV1Z6YzJWdVoyVnlMell1TXk0MklFNWxkRlI1Y0dVdlYwbEdTU0JNWVc1bmRXRm5aUzk2YUY5RFRnPT1kZDcwZDVjMGZhODZiYjk4MGJkZWY3MTEwY2JlYjFkODk4ZTczNDk2; HY=MjAxNTExMTE=<span class="number">19</span>c1ef297a9e75c4dd74c88d89210f4d7af5c7f81466112a248d3106f14675fc55fddd3155d19d64dd70d5c0fa86bb980bdef7110cbeb1d898e73496; Hm_1vt_6f69830ae7173059e935b61372431b35=KnmCelZC8x9GIH8bCd6nAg==; Hm_p1vt_6f69830ae7173059e935b61372431b35=KnmCelZC8yVGIH8bCd61Ag==; _ga=GA1<span class="number">.2</span><span class="number">.1317140790</span><span class="number">.1447137058</span>; _gat=<span class="number">1</span>
-</code></pre><p>继续采用控制变量法一点点删掉Cookie，最终，能够访问的最短Cookie是这么一串：</p>
-<pre><code>ansoecdxc
-</code></pre><h3 id="自定义访问的Cookie">自定义访问的Cookie</h3><p>有了上面一串东西，下面要做的就是自己组装一个Cookie了，代码如下：</p>
-<pre><code>let cookieValue = <span class="built_in">NSHTTPCookie</span>(properties: [
-    <span class="built_in">NSHTTPCookieDomain</span>: <span class="string">"shanghaicity.openservice.kankanews.com"</span>,
-    <span class="built_in">NSHTTPCookiePath</span>: <span class="string">"/"</span>,
-    <span class="built_in">NSHTTPCookieName</span>: <span class="string">"Hm_p1vt_6f69830ae7173059e935b61372431b35"</span>,
-    <span class="built_in">NSHTTPCookieValue</span>: <span class="string">"; ansoecdxc=oY1pTw1R0Nhy7b_Z2A78eRuc8_j8"</span>,
-    <span class="built_in">NSHTTPCookieExpires</span>: <span class="built_in">NSDate</span>(timeIntervalSinceNow: oneYearInSeconds)
-])
-manager<span class="variable">.session</span><span class="variable">.configuration</span><span class="variable">.HTTPCookieStorage</span>?<span class="variable">.setCookie</span>(cookieValue!)
-</code></pre><p>其中，<code>NSHTTPCookieDomain</code>, <code>NSHTTPCookiePath</code>, <code>NSHTTPCookieName</code>这三个是缺一不可的，否则这个对象就是nil，<code>NSHTTPCookieValue</code>设置时在前面加了个分号，以便和name隔开。<br>设置好了之后，打开应用开始访问，结果仍然失败，用<code>print(manager.session.configuration.HTTPCookieStorage?.cookies)</code>打印cookies查看，发现里面有两个Cookies:</p>
-<pre><code>Optional([
-&lt;NSHTTPCookie version:<span class="number">0</span> name:<span class="string">"Hm_p1vt_6f69830ae7173059e935b61372431b35"</span> value:<span class="string">"; ansoecdxc=oY1pTw1R0Nhy7b_Z2A78eRuc8_j8"</span> expiresDate:<span class="number">2016</span>-<span class="number">11</span>-<span class="number">10</span> <span class="number">08</span>:<span class="number">11</span>:<span class="number">24</span> +<span class="number">0000</span> created:<span class="number">2015</span>-<span class="number">11</span>-<span class="number">11</span> <span class="number">08</span>:<span class="number">11</span>:<span class="number">24</span> +<span class="number">0000</span> sessionOnly:FALSE domain:<span class="string">"shanghaicity.openservice.kankanews.com"</span> path:<span class="string">"/"</span> isSecure:FALSE&gt;, 
-&lt;NSHTTPCookie version:<span class="number">0</span> name:<span class="string">"Hm_p1vt_6f69830ae7173059e935b61372431b35"</span> value:<span class="string">"a7d3553e9caab5ffe189a0d77b42df46"</span> expiresDate:(null) created:<span class="number">2015</span>-<span class="number">11</span>-<span class="number">11</span> <span class="number">08</span>:<span class="number">11</span>:<span class="number">17</span> +<span class="number">0000</span> sessionOnly:TRUE domain:<span class="string">"shanghaicity.openservice.kankanews.com"</span> path:<span class="string">"/public/bus/mes/sid"</span> isSecure:FALSE&gt;
-])
-</code></pre><p>第二个cookie是服务端返回后添加的，必须要删掉，否则之后还是无法访问，采取的办法是每次调API前都清一遍Cookie，再加上自定义的Cookie:</p>
-<pre><code><span class="keyword">for</span> <span class="keyword">each</span> <span class="keyword">in</span> (manager.session.configuration.HTTPCookieStorage?.cookies)! {
-    manager.session.configuration.HTTPCookieStorage?.deleteCookie(<span class="keyword">each</span>);
-}
-</code></pre><p>于是终于抓到数据了~~</p>
-<h3 id="参考资料">参考资料</h3><p><a href="http://stackoverflow.com/questions/5954382/ios-is-it-possible-to-set-a-cookie-manually-using-sharedhttpcookiestorage-for-a" target="_blank" rel="external">iOS: Is it possible to set a cookie manually using sharedHTTPCookieStorage for a UIWebView?</a><br><a href="http://stackoverflow.com/questions/1852515/how-to-clear-cookies-from-nshttpcookiestorage-more-then-once" target="_blank" rel="external">How to clear cookies from NSHTTPCookieStorage more then once?</a></p>
-</span>
+<h3 id="查找问题">查找问题</h3><p>之所以不能用，是因为这个接口开始检测点击的来源了，尝试打开<a href="http://shanghaicity.openservice.kankanews.com/public/bus/mes/sid/0db6ca4f4b3b83c70a59ef3cdbe003b6">某页面</a>,如果它认为不是来自微信客户端内部的点击，就会跳转到下面的界面。</p>
+<p><img src="http://7xl7ci.com1.z0.glb.clouddn.com/httpcookie_mms.png" alt="wechat" title="wechat" /></p>
+          <div class="post-more-link text-center">
+            <a class="btn" href="/2015/11/11/自定义HTTP请求的Cookie/#more" rel="contents">
+              Read more &raquo;
+            </a>
+          </div>
         
       
     </div>
