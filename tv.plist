@@ -5,10 +5,10 @@
 	<key>湖南卫视2</key>
 	<string>http://liveproxy.fengyunzhibo.com:9222/mweb/cmv/hnws.m3u8</string>
 	<key>湖南卫视1</key>
-	<string>http://live.cdn.cmvideo.cn:8088/envivo_w/HD/hunan/711/index.m3u8?msisdn=2174857675654&amp;mdspid=&amp;spid=699017&amp;netType=6&amp;sid=2201064496&amp;pid=2028593060&amp;timestamp=20151113234839&amp;Channel_ID=3012_40060000000&amp;ProgramID=608207858&amp;ParentNodeID=-1&amp;encrypt=de18591f19cbbd9c916e625c29bb0f00</string>
+	<string>http://www.hlyy.cc/zxtv/m/hn1.html</string>
 	<key>浙江卫视2</key>
-	<string>http://hls4.l.cztv.com/channels/lantian/channel01/m3u8:360p?k=aa0dc35469cbfe6b4ad93e559120617f&amp;t=1447430219</string>
+	<string>http://tv.cztv.com/mlive/index.shtml</string>
 	<key>浙江卫视1</key>
-	<string>http://live.cdn.cmvideo.cn:8088/envivo_w/SD/zhejiang/711/index.m3u8?msisdn=2165348536768&amp;mdspid=&amp;spid=699013&amp;netType=6&amp;sid=2202214764&amp;pid=2028593060&amp;timestamp=20151113235010&amp;Channel_ID=3012_40060000000&amp;ProgramID=603279993&amp;ParentNodeID=-1&amp;encrypt=6a15878024090354720bcf811ed55da4</string>
+	<string>http://m.cztv.com/tv_view.php?id=1</string>
 </dict>
 </plist>
